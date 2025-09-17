@@ -1,7 +1,7 @@
 {
-  "name": "KisanVaani – Indian Farmer App",
+  "name": "KisanVaani – Kerala Farmer App",
   "short_name": "KisanVaani",
-  "description": "AI farming assistant for Indian farmers in local languages",
+  "description": "AI farming assistant in local languages for Kerala farmers",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F7F9F2",
