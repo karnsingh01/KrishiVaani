@@ -1,4 +1,4 @@
-// KrishiVaani Agricultural Voice Assistant - Complete JavaScript Functionality
+// KrishiVaani Agricultural Voice Assistant - Fresh Complete Version
 class KrishiVaani {
     constructor() {
         this.recognition = null;
@@ -7,7 +7,7 @@ class KrishiVaani {
         this.currentTranscript = '';
         this.finalTranscript = '';
         this.permissionGranted = false;
-        
+
         // Agricultural knowledge base
         this.agriculturalData = {
             cropProblems: {
@@ -49,16 +49,18 @@ class KrishiVaani {
                 "पीएम किसान": "PM-KISAN योजना में किसानों को प्रति वर्ष ₹6000 की सहायता मिलती है। यह तीन किस्तों में दी जाती है।"
             }
         };
-        
+
         this.init();
     }
-    
+
     init() {
+        console.log('🌾 KrishiVaani Initializing...');
         this.checkSystemRequirements();
         this.setupEventListeners();
         this.updateStatus("सिस्टम तैयार हो रहा है...");
+        console.log('✅ KrishiVaani Ready!');
     }
-    
+
     checkSystemRequirements() {
         const httpsStatus = document.getElementById('httpsStatus');
         const httpsText = document.getElementById('httpsText');
@@ -66,7 +68,7 @@ class KrishiVaani {
         const browserText = document.getElementById('browserText');
         const micStatus = document.getElementById('micStatus');
         const micText = document.getElementById('micText');
-        
+
         // Check HTTPS
         const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
         if (isHttps) {
@@ -78,11 +80,11 @@ class KrishiVaani {
             httpsText.textContent = 'Need HTTPS';
             httpsText.className = 'status-error';
         }
-        
+
         // Check Browser Support
         const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
         const hasGetUserMedia = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
-        
+
         if (hasSpeechRecognition && hasGetUserMedia) {
             browserStatus.textContent = '🟢';
             browserText.textContent = 'Compatible';
@@ -92,12 +94,12 @@ class KrishiVaani {
             browserText.textContent = 'Use Chrome/Edge';
             browserText.className = 'status-error';
         }
-        
+
         // Update mic status
         micStatus.textContent = '🎤';
         micText.textContent = 'Ready to test';
         micText.className = 'status-warning';
-        
+
         // Enable/disable mic button based on system readiness
         const micBtn = document.getElementById('micBtn');
         if (isHttps && hasSpeechRecognition && hasGetUserMedia) {
@@ -109,37 +111,50 @@ class KrishiVaani {
             this.showFallback();
         }
     }
-    
+
     setupEventListeners() {
         const micBtn = document.getElementById('micBtn');
         const retryBtn = document.getElementById('retryBtn');
         const sendBtn = document.getElementById('sendBtn');
         const textInput = document.getElementById('textInput');
         const questionBtns = document.querySelectorAll('.question-btn');
-        
-        micBtn.addEventListener('click', () => this.startVoiceInput());
-        retryBtn.addEventListener('click', () => this.retryVoiceInput());
-        sendBtn.addEventListener('click', () => this.processTextInput());
-        
-        textInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.processTextInput();
-            }
-        });
-        
+
+        if (micBtn) {
+            micBtn.addEventListener('click', () => this.startVoiceInput());
+        }
+
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => this.retryVoiceInput());
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.processTextInput());
+        }
+
+        if (textInput) {
+            textInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.processTextInput();
+                }
+            });
+        }
+
         questionBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const question = btn.getAttribute('data-question');
                 this.processQuery(question);
             });
         });
+
+        console.log('✅ Event listeners setup complete');
     }
-    
+
     async startVoiceInput() {
+        console.log('🎤 Starting voice input...');
         this.hideAllSections();
         this.updateStatus("माइक की अनुमति मांगी जा रही है...");
         this.setMicState('requesting');
-        
+
         try {
             // Request microphone permission
             const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -149,52 +164,58 @@ class KrishiVaani {
                     autoGainControl: true
                 }
             });
-            
+
+            console.log('✅ Microphone permission granted');
+
             // Permission granted, stop the stream
             stream.getTracks().forEach(track => track.stop());
-            
+
             // Update status
             const micText = document.getElementById('micText');
-            micText.textContent = 'Permission granted';
-            micText.className = 'status-ready';
-            
+            if (micText) {
+                micText.textContent = 'Permission granted';
+                micText.className = 'status-ready';
+            }
+
             this.permissionGranted = true;
-            
+
             // Initialize speech recognition
             await this.initializeSpeechRecognition();
-            
+
         } catch (error) {
-            console.error('Microphone error:', error);
+            console.error('❌ Microphone error:', error);
             this.handleMicrophoneError(error);
         }
     }
-    
+
     async initializeSpeechRecognition() {
         try {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
+
             if (!SpeechRecognition) {
                 throw new Error('Speech recognition not supported');
             }
-            
+
+            console.log('🗣️ Initializing speech recognition...');
+
             this.recognition = new SpeechRecognition();
             this.recognition.continuous = false;
             this.recognition.interimResults = true;
             this.recognition.lang = 'hi-IN';
             this.recognition.maxAlternatives = 1;
-            
+
             this.recognition.onstart = () => {
-                console.log('Speech recognition started');
+                console.log('✅ Speech recognition started');
                 this.isListening = true;
                 this.updateStatus("सुन रहा हूं... बोलिए");
                 this.setMicState('listening');
                 this.showTranscript();
             };
-            
+
             this.recognition.onresult = (event) => {
                 let interimTranscript = '';
                 let finalTranscript = '';
-                
+
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
@@ -203,13 +224,13 @@ class KrishiVaani {
                         interimTranscript += transcript;
                     }
                 }
-                
+
                 // Update transcript display
                 const transcriptDisplay = finalTranscript || interimTranscript;
                 this.updateTranscript(transcriptDisplay);
-                
+
                 if (finalTranscript.trim()) {
-                    console.log('Final transcript:', finalTranscript);
+                    console.log('📝 Final transcript:', finalTranscript);
                     this.finalTranscript = finalTranscript.trim();
                     this.updateStatus("AI सोच रहा है...");
                     this.setMicState('thinking');
@@ -218,15 +239,15 @@ class KrishiVaani {
                     }, 1200);
                 }
             };
-            
+
             this.recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
+                console.error('❌ Speech recognition error:', event.error);
                 this.isListening = false;
                 this.handleSpeechError(event.error);
             };
-            
+
             this.recognition.onend = () => {
-                console.log('Speech recognition ended');
+                console.log('🔚 Speech recognition ended');
                 this.isListening = false;
                 if (!this.finalTranscript) {
                     this.updateStatus("कुछ नहीं सुनाई दिया। कृपया दोबारा कोशिश करें।");
@@ -234,19 +255,20 @@ class KrishiVaani {
                     this.showError("स्पष्ट आवाज में बोलें और दोबारा कोशिश करें।");
                 }
             };
-            
+
             // Start recognition
             this.recognition.start();
-            
+            console.log('🎙️ Speech recognition started');
+
         } catch (error) {
-            console.error('Recognition initialization error:', error);
+            console.error('❌ Recognition initialization error:', error);
             this.handleMicrophoneError(error);
         }
     }
-    
+
     handleMicrophoneError(error) {
         let errorMessage = "माइक्रोफोन की समस्या हुई।";
-        
+
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
             errorMessage = "माइक्रोफोन की अनुमति नहीं मिली। कृपया ब्राउज़र सेटिंग में माइक को allow करें।";
         } else if (error.name === 'NotFoundError') {
@@ -254,20 +276,24 @@ class KrishiVaani {
         } else if (error.message === 'Speech recognition not supported') {
             errorMessage = "यह ब्राउज़र समर्थित नहीं है। कृपया Chrome या Edge का उपयोग करें।";
         }
-        
+
+        console.error('❌ Microphone error handled:', errorMessage);
+
         this.showError(errorMessage);
         this.setMicState('error');
         this.showFallback();
-        
+
         // Update mic status
         const micText = document.getElementById('micText');
-        micText.textContent = 'Error occurred';
-        micText.className = 'status-error';
+        if (micText) {
+            micText.textContent = 'Error occurred';
+            micText.className = 'status-error';
+        }
     }
-    
+
     handleSpeechError(errorType) {
         let message = "आवाज पहचान में समस्या हुई।";
-        
+
         switch (errorType) {
             case 'not-allowed':
             case 'permission-denied':
@@ -286,25 +312,31 @@ class KrishiVaani {
                 message = "आवाज पहचान रुक गई। कृपया दोबारा कोशिश करें।";
                 break;
         }
-        
+
+        console.error('🔊 Speech error handled:', message);
+
         this.showError(message);
         this.setMicState('error');
     }
-    
+
     processQuery(query) {
         if (!query || !query.trim()) {
             this.showError("कोई प्रश्न नहीं मिला। कृपया दोबारा कोशिश करें।");
             return;
         }
-        
+
+        console.log('🤖 Processing query:', query);
+
         const lowerQuery = query.toLowerCase();
         const response = this.getAIResponse(lowerQuery);
-        
+
         this.showResponse(response);
         this.speakResponse(response);
     }
-    
+
     getAIResponse(query) {
+        console.log('🧠 Generating AI response for:', query);
+
         // Check crop problems
         for (const [problem, data] of Object.entries(this.agriculturalData.cropProblems)) {
             if (query.includes(problem.toLowerCase())) {
@@ -316,7 +348,7 @@ class KrishiVaani {
                 };
             }
         }
-        
+
         // Check market prices
         for (const [crop, priceInfo] of Object.entries(this.agriculturalData.marketPrices)) {
             if (query.includes(crop) && (query.includes('कीमत') || query.includes('भाव') || query.includes('rate'))) {
@@ -328,7 +360,7 @@ class KrishiVaani {
                 };
             }
         }
-        
+
         // Check weather
         if (query.includes('मौसम') || query.includes('weather')) {
             return {
@@ -338,7 +370,7 @@ class KrishiVaani {
                 urgency: "आज के लिए सलाह"
             };
         }
-        
+
         // Check government schemes
         for (const [scheme, info] of Object.entries(this.agriculturalData.schemes)) {
             if (query.includes(scheme.toLowerCase())) {
@@ -350,7 +382,7 @@ class KrishiVaani {
                 };
             }
         }
-        
+
         // Default response
         return {
             type: 'general',
@@ -359,129 +391,137 @@ class KrishiVaani {
             urgency: "अधिक जानकारी के लिए स्पष्ट प्रश्न पूछें"
         };
     }
-    
+
     speakResponse(response) {
         if ('speechSynthesis' in window) {
+            console.log('🔊 Speaking response...');
             this.updateStatus("जवाब दे रहा हूं...");
             this.setMicState('speaking');
-            
+
             const text = `${response.diagnosis}। ${response.solution}`;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'hi-IN';
             utterance.rate = 0.9;
             utterance.volume = 0.8;
-            
+
             utterance.onend = () => {
+                console.log('✅ Speaking completed');
                 this.updateStatus("माइक बटन दबाएं और बोलें");
                 this.setMicState('ready');
             };
-            
+
             utterance.onerror = () => {
+                console.log('❌ Speaking error');
                 this.updateStatus("माइक बटन दबाएं और बोलें");
                 this.setMicState('ready');
             };
-            
+
             this.synthesis.speak(utterance);
         } else {
+            console.log('🔇 Speech synthesis not available');
             this.updateStatus("माइक बटन दबाएं और बोलें");
             this.setMicState('ready');
         }
     }
-    
+
     processTextInput() {
         const textInput = document.getElementById('textInput');
-        const query = textInput.value.trim();
-        
+        const query = textInput?.value.trim();
+
         if (query) {
+            console.log('⌨️ Processing text input:', query);
             textInput.value = '';
             this.updateTranscript(query);
             this.showTranscript();
             this.processQuery(query);
         }
     }
-    
+
     retryVoiceInput() {
+        console.log('🔄 Retrying voice input...');
         this.hideAllSections();
         this.finalTranscript = '';
         this.currentTranscript = '';
-        
+
         if (this.recognition) {
             this.recognition.stop();
             this.recognition = null;
         }
-        
+
         if (this.synthesis) {
             this.synthesis.cancel();
         }
-        
+
         setTimeout(() => {
             this.startVoiceInput();
         }, 500);
     }
-    
+
     // UI Helper Methods
     updateStatus(message) {
         const statusEl = document.getElementById('status');
         if (statusEl) {
             statusEl.textContent = message;
         }
+        console.log('📱 Status updated:', message);
     }
-    
+
     setMicState(state) {
         const micBtn = document.getElementById('micBtn');
         if (micBtn) {
             micBtn.className = `mic-btn ${state}`;
         }
+        console.log('🎤 Mic state:', state);
     }
-    
+
     updateTranscript(text) {
         const transcriptEl = document.getElementById('transcript');
         if (transcriptEl) {
             transcriptEl.textContent = text;
         }
     }
-    
+
     showTranscript() {
         const section = document.getElementById('transcriptSection');
         if (section) {
             section.classList.remove('hidden');
         }
     }
-    
+
     showResponse(response) {
         const section = document.getElementById('responseSection');
         const content = document.getElementById('responseContent');
-        
+
         if (section && content) {
             let html = `<div class="diagnosis"><strong>🔍 निदान:</strong> ${response.diagnosis}</div>`;
             html += `<div class="solution"><strong>💡 समाधान:</strong> ${response.solution}</div>`;
-            
+
             if (response.urgency) {
                 html += `<div class="urgency"><strong>⚡ जरूरी:</strong> ${response.urgency}</div>`;
             }
-            
+
             content.innerHTML = html;
             section.classList.remove('hidden');
         }
     }
-    
+
     showError(message) {
         const section = document.getElementById('errorSection');
         const messageEl = document.getElementById('errorMessage');
-        
+
         if (section && messageEl) {
             messageEl.textContent = message;
             section.classList.remove('hidden');
         }
     }
-    
+
     showFallback() {
         const section = document.getElementById('fallbackSection');
         if (section) {
             section.classList.remove('hidden');
         }
     }
-    
+
     hideAllSections() {
         const sections = ['transcriptSection', 'responseSection', 'errorSection'];
         sections.forEach(sectionId => {
@@ -495,7 +535,23 @@ class KrishiVaani {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌾 KrishiVaani Loading...');
-    new KrishiVaani();
-    console.log('✅ KrishiVaani Ready!');
+    console.log('🌾 KrishiVaani DOM loaded, starting app...');
+
+    try {
+        new KrishiVaani();
+    } catch (error) {
+        console.error('❌ Failed to initialize KrishiVaani:', error);
+
+        // Show error in UI if possible
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+            statusEl.textContent = 'ऐप लोड करने में समस्या हुई। पेज रीफ्रेश करें।';
+            statusEl.style.color = '#ef4444';
+        }
+    }
+});
+
+// Global error handler
+window.addEventListener('error', (event) => {
+    console.error('🚨 Global error:', event.error);
 });
