@@ -43,10 +43,10 @@
 
         <section class="voice-card">
             <h2>🎤 सब कुछ पूछें – आवाज़ से!</h2>
-            <p>फसल, मौसम, कीमत, योजना – बोलें या टाइप करें। माइक परमिशन दें।</p>
+            <p>नोट: पहली बार माइक परमिशन दें। Chrome/Edge में सबसे अच्छा काम करता है।</p>
             <div class="mic-container">
                 <button id="micBtn" class="mic-btn" disabled>🎤</button>
-                <div class="status" id="status">माइक चेक करें...</div>
+                <div class="status" id="status">माइक चेक हो रहा है...</div>
             </div>
             <div class="input-group">
                 <input type="text" id="textInput" class="text-input" placeholder="उदा: कोच्चि मौसम या टमाटर कीमत">
@@ -67,26 +67,26 @@
         </nav>
 
         <section id="weatherSection" class="section-card hidden">
-            <h2>☀️ IMD मौसम</h2>
-            <input type="text" id="cityInput" placeholder="शहर (उदा: कोच्चि)">
-            <button id="weatherBtn">देखें</button>
-            <div id="weatherOutput"></div>
+            <h2>☀️ मौसम रिपोर्ट (IMD से)</h2>
+            <input type="text" id="cityInput" class="text-input" placeholder="शहर (उदा: कोच्चि)">
+            <button id="weatherBtn" class="send-btn">मौसम देखें</button>
+            <div id="weatherOutput" class="response-content"></div>
         </section>
 
         <section id="mandiSection" class="section-card hidden">
-            <h2>🛒 मंडी कीमतें</h2>
-            <input type="text" id="mandiSearch" placeholder="सर्च: टमाटर पालक्काड">
+            <h2>🛒 मंडी कीमतें (Agmarknet से)</h2>
+            <input type="text" id="mandiSearch" class="text-input" placeholder="सर्च: टमाटर पालक्काड">
             <select id="commoditySelect">
                 <option value="Tomato">टमाटर</option>
                 <option value="Onion">प्याज</option>
                 <option value="Pineapple">पाइनएप्पल</option>
             </select>
-            <button id="mandiBtn">सर्च</button>
-            <div id="mandiOutput"></div>
+            <button id="mandiBtn" class="send-btn">कीमत देखें</button>
+            <div id="mandiOutput" class="response-content"></div>
         </section>
 
         <section id="schemesSection" class="section-card hidden">
-            <ul id="schemesList"></ul>
+            <ul id="schemesList" class="help-list"></ul>
         </section>
     </div>
 
