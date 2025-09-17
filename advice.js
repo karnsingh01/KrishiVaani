@@ -3,11 +3,21 @@ const fetch = require('node-fetch');
 exports.handler = async (event, context) => {
   try {
     const { query = '', lang = 'hi-IN' } = event.queryStringParameters || {};
-    const apiKey = process.env.XAI_API_KEY; // Set in Netlify Environment Variables
+    const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) throw new Error('xAI API key not set – https://x.ai/api से लें');
 
-    // AI Prompt for Farming Assistant
-    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${lang === 'ml-IN' ? 'Malayalam' : 'Hindi'}. Query: "${query}". Provide accurate, fast advice on weather, mandi prices (Tomato ₹26/kg Palakkad, Banana ₹30/kg, etc., 18 Sep 2025), crop problems (yellow leaves = nitrogen deficiency, urea 25kg/acre), schemes (PM-KISAN ₹6000/year). Keep short, helpful.`;
+    const languageMap = {
+      'hi-IN': 'Hindi',
+      'ml-IN': 'Malayalam',
+      'ta-IN': 'Tamil',
+      'te-IN': 'Telugu',
+      'mr-IN': 'Marathi',
+      'gu-IN': 'Gujarati',
+      'en-IN': 'English'
+    };
+    const langName = languageMap[lang] || 'Hindi';
+
+    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${langName}. Query: "${query}". Provide accurate, fast advice on weather (Kochi 26°C, light rain, 18 Sep 2025), mandi prices (Tomato ₹26/kg, Banana ₹30/kg Palakkad), crop problems (yellow leaves = nitrogen deficiency, urea 25kg/acre), schemes (PM-KISAN ₹6000/year). Keep short, helpful.`;
 
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
@@ -34,7 +44,6 @@ exports.handler = async (event, context) => {
     };
   } catch (error) {
     console.error('AI query error:', error);
-    // Fallback Local AI-Like Response
     const fallbacks = {
       'hi-IN': 'AI जवाब: फसल समस्या बताएँ – मौसम कोच्चि में 26°C, हल्की बारिश। मंडी: टमाटर ₹26/kg।',
       'ml-IN': 'AI ഉത്തരം: ഫലപ്രശ്നം പറയൂ – കാലാവസ്ഥ കൊച്ചി 26°C, മഴ. മാർക്കറ്റ്: തക്കാളി ₹26/kg.'
