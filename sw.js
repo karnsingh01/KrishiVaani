@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kisanvaani-v1';
+const CACHE_NAME = 'kisanvaani-v2';
 const urlsToCache = ['/', '/index.html', '/style.css', '/app.js'];
 
 self.addEventListener('install', (event) => {
