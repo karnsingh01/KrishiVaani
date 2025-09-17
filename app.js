@@ -4,28 +4,6 @@ class KisanVaaniApp {
     this.synthesis = window.speechSynthesis;
     this.currentLang = 'hi-IN';
     this.permissionGranted = false;
-    this.commodities = [
-      { name: 'Tomato', hindi: 'टमाटर', malayalam: 'തക്കാളി' },
-      { name: 'Onion', hindi: 'प्याज', malayalam: 'സവോള' },
-      { name: 'Pineapple', hindi: 'अनानास', malayalam: 'കൈതച്ചക്ക' },
-      { name: 'Banana', hindi: 'केला', malayalam: 'വാഴപ്പഴം' },
-      { name: 'Mango', hindi: 'आम', malayalam: 'മാമ്പഴം' },
-      { name: 'Potato', hindi: 'आलू', malayalam: 'ഉരുളക്കിഴങ്ങ്' },
-      { name: 'Brinjal', hindi: 'बैंगन', malayalam: 'വഴുതന' },
-      { name: 'Cabbage', hindi: 'पत्तागोभी', malayalam: 'മുട്ടക്കോസ്' },
-      // Add more as needed
-    ];
-    this.agriculturalData = {
-      cropProblems: {
-        'पत्तियां पीली': { diagnosis: 'नाइट्रोजन की कमी', solution: 'यूरिया 25kg/एकड़ छिड़कें।' },
-        'ഇലകൾ മഞ്ഞ': { diagnosis: 'നൈട്രജൻ കുറവ്', solution: 'യൂറിയ 25kg/ഏക്കർ തളിക്കുക.' },
-        // ... (as before)
-      }
-    };
-    this.schemes = [
-      { name: 'PM-KISAN', desc: '₹6000/वर्ष छोटे किसानों को।', link: 'https://pmkisan.gov.in/' },
-      // ... (as before)
-    ];
     this.initApp();
   }
 
@@ -35,11 +13,13 @@ class KisanVaaniApp {
       document.getElementById('appContent').style.display = 'block';
     }, 3000);
 
-    // Greetings and tips as before...
+    const greetings = ['नमस्ते, कोच्चि के किसान!', 'हाय, पालक्काड किसान!'];
+    document.getElementById('greeting').textContent = greetings[Math.floor(Math.random() * greetings.length)];
+    const tips = ['मॉनसून में धान की सिंचाई 5-7 दिन में करें।', 'नारियल में बड रॉट के लिए बोर्डो स्प्रे करें।'];
+    document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
+
     this.checkSystemRequirements();
     this.setupEventListeners();
-    this.populateSchemes();
-    this.populateCommodities();
   }
 
   async checkSystemRequirements() {
@@ -51,7 +31,7 @@ class KisanVaaniApp {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
       this.permissionGranted = true;
       micBtn.disabled = false;
@@ -59,16 +39,52 @@ class KisanVaaniApp {
     } catch (err) {
       console.error('Mic permission error:', err);
       status.textContent = 'माइक परमिशन दें। AI टेक्स्ट से भी जवाब देगा।';
-      micBtn.disabled = false; // Allow text fallback
+      micBtn.disabled = false;
     }
   }
 
   setupEventListeners() {
-    // As before, but mic click now triggers AI processing
     const micBtn = document.getElementById('micBtn');
-    micBtn.addEventListener('click', () => this.startVoiceInput());
+    const sendBtn = document.getElementById('sendBtn');
+    const textInput = document.getElementById('textInput');
+    const langSelect = document.getElementById('langSelect');
+    const weatherBtn = document.getElementById('weatherBtn');
+    const mandiBtn = document.getElementById('mandiBtn');
+    const schemesBtn = document.getElementById('schemesBtn');
 
-    // ... (other listeners as before)
+    micBtn.addEventListener('click', () => this.startVoiceInput());
+    sendBtn.addEventListener('click', () => this.processTextInput());
+    textInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.processTextInput(); });
+
+    langSelect.addEventListener('change', (e) => {
+      this.currentLang = e.target.value;
+      document.getElementById('status').textContent = `भाषा बदली: ${e.target.options[e.target.selectedIndex].text} – माइक दबाएँ।`;
+    });
+
+    weatherBtn.addEventListener('click', () => {
+      const city = document.getElementById('cityInput').value || 'Kochi';
+      this.processQuery(`कोच्चि का मौसम बताओ`); // AI prompt
+    });
+
+    mandiBtn.addEventListener('click', () => {
+      const commodity = document.getElementById('commoditySelect').value || 'Tomato';
+      const district = document.getElementById('mandiSearch').value || 'Palakkad';
+      this.processQuery(`${commodity} की कीमत ${district} में बताओ`);
+    });
+
+    schemesBtn.addEventListener('click', () => {
+      this.processQuery('PM-KISAN योजना की डिटेल्स बताओ');
+    });
+
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelector('.nav-btn.active').classList.remove('active');
+        e.target.classList.add('active');
+        document.querySelectorAll('.section-card, .voice-card').forEach(sec => sec.classList.add('hidden'));
+        const sectionId = e.target.dataset.section === 'home' ? 'voice-card' : e.target.dataset.section + 'Section';
+        document.getElementById(sectionId).classList.remove('hidden');
+      });
+    });
   }
 
   async startVoiceInput() {
@@ -97,7 +113,7 @@ class KisanVaaniApp {
       this.recognition.onerror = (event) => {
         console.error('Speech error:', event.error);
         status.textContent = 'AI फेल – टेक्स्ट यूज़ करें।';
-        this.processQuery(''); // Fallback to AI prompt
+        this.processQuery(''); // Fallback AI
       };
 
       this.recognition.onend = () => {
@@ -119,7 +135,7 @@ class KisanVaaniApp {
     const lowerQuery = query.toLowerCase();
     let response;
 
-    // AI Call for All Queries (xAI API)
+    // Totally AI Call for All Queries
     try {
       const aiRes = await fetch(`/.netlify/functions/ai-query?query=${encodeURIComponent(query)}&lang=${this.currentLang}`);
       if (aiRes.ok) {
@@ -136,16 +152,28 @@ class KisanVaaniApp {
     this.speakResponse(response);
   }
 
-  // Other methods (fetchWeather, fetchMandiPrices, etc.) now redirect to AI-query function
-  async fetchWeather(city) {
-    return await this.processQuery(`${city} का मौसम बताओ`);
+  // Other methods (showResponse, speakResponse, etc.) as before...
+  speakResponse(response) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(response.solution);
+      utterance.lang = this.currentLang;
+      utterance.rate = 0.9;
+      this.synthesis.speak(utterance);
+    }
   }
 
-  async fetchMandiPrices(commodity, district) {
-    return await this.processQuery(`${commodity} की कीमत ${district} में बताओ`);
+  showResponse(response) {
+    document.getElementById('responseContent').innerHTML = `<div class="solution"><strong>🔍 AI उत्तर:</strong> ${response.solution}</div>`;
+    document.getElementById('responseSection').classList.remove('hidden');
   }
 
-  // ... (other methods as before)
+  processTextInput() {
+    const query = document.getElementById('textInput').value.trim();
+    if (query) {
+      document.getElementById('textInput').value = '';
+      this.processQuery(query);
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => new KisanVaaniApp());
