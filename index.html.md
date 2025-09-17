@@ -1,0 +1,116 @@
+# KrishiVaani - index.html
+
+```html
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrishiVaani - कृषि सहायक</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="title">🌾 KrishiVaani</h1>
+            <p class="subtitle">आपका कृषि सहायक</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- System Status -->
+            <div class="system-status" id="systemStatus">
+                <div class="status-item">
+                    <span class="status-icon" id="httpsStatus">🔒</span>
+                    <span class="status-text">HTTPS: <span id="httpsText">Checking...</span></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon" id="browserStatus">🌐</span>
+                    <span class="status-text">Browser: <span id="browserText">Checking...</span></span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon" id="micStatus">🎤</span>
+                    <span class="status-text">Microphone: <span id="micText">Not tested</span></span>
+                </div>
+            </div>
+
+            <!-- Voice Assistant -->
+            <div class="voice-card">
+                <h2>🎤 आवाज़ से पूछें</h2>
+                <p>फसल की समस्या, बाजार भाव, या मौसम के बारे में बताएं</p>
+                
+                <!-- Mic Button -->
+                <div class="mic-container">
+                    <button class="mic-btn" id="micBtn">
+                        <div class="mic-icon">🎤</div>
+                        <div class="mic-pulse"></div>
+                    </button>
+                    <p class="status" id="status">माइक बटन दबाएं और बोलें</p>
+                </div>
+
+                <!-- Transcript -->
+                <div class="transcript-section hidden" id="transcriptSection">
+                    <h3>आपने कहा:</h3>
+                    <p class="transcript" id="transcript">यहां आपके बोले गए शब्द दिखेंगे...</p>
+                </div>
+
+                <!-- Response -->
+                <div class="response-section hidden" id="responseSection">
+                    <h3>🤖 AI का जवाब:</h3>
+                    <div class="response-content" id="responseContent"></div>
+                </div>
+
+                <!-- Error -->
+                <div class="error-section hidden" id="errorSection">
+                    <div class="error-content">
+                        <h3>⚠️ समस्या</h3>
+                        <p class="error-message" id="errorMessage"></p>
+                        <button class="retry-btn" id="retryBtn">फिर कोशिश करें</button>
+                    </div>
+                </div>
+
+                <!-- Text Fallback -->
+                <div class="fallback-section hidden" id="fallbackSection">
+                    <h3>📝 टाइप करके पूछें:</h3>
+                    <div class="input-group">
+                        <input type="text" class="text-input" id="textInput" placeholder="अपना प्रश्न यहां लिखें...">
+                        <button class="send-btn" id="sendBtn">भेजें</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Questions -->
+            <div class="quick-questions">
+                <h3>जल्दी पूछें:</h3>
+                <div class="question-grid">
+                    <button class="question-btn" data-question="गेहूं की कीमत क्या है">गेहूं की कीमत</button>
+                    <button class="question-btn" data-question="आज का मौसम कैसा है">आज का मौसम</button>
+                    <button class="question-btn" data-question="पत्तियां पीली हो रही हैं">पत्तियां पीली</button>
+                    <button class="question-btn" data-question="कीड़े लगे हैं फसल में">कीट की समस्या</button>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="help-section">
+                <h3>📋 उदाहरण प्रश्न:</h3>
+                <ul class="help-list">
+                    <li>"मेरी फसल में पत्तियां पीली हो रही हैं"</li>
+                    <li>"गेहूं की आज की कीमत क्या है?"</li>
+                    <li>"आज का मौसम कैसा रहेगा?"</li>
+                    <li>"कीड़े लगे हैं, क्या करूं?"</li>
+                    <li>"यूरिया खाद कितनी डालनी चाहिए?"</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
+```
+
+**Instructions:** Save this as `index.html`
