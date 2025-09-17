@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ml">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KisanVaani – Kerala Farmer App</title>
+    <title>KisanVaani – भारतीय किसान ऐप</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
     <div id="splash" class="splash">
         <div class="splash-content">
             <div class="splash-icon">🌾</div>
-            <h2>KisanVaani ലോഡ് ചെയ്യുന്നു...</h2>
+            <h2>KisanVaani लोड हो रहा है...</h2>
             <div class="splash-loader"></div>
         </div>
     </div>
@@ -21,63 +21,67 @@
     <div class="container" id="appContent" style="display:none;">
         <header class="header">
             <h1 class="title">🌿 KisanVaani</h1>
-            <p class="subtitle" id="greeting">നമസ്കാരം! ഇന്നത്തെ ടിപ്പ്: നാളികേരത്തിൽ ബഡ് റോട്ട് പരിശോധിക്കുക.</p>
+            <p class="subtitle" id="greeting">नमस्ते! आज की सलाह: नारियल में बड रॉट चेक करें।</p>
         </header>
 
         <div class="language-selector">
             <select id="langSelect">
-                <option value="ml-IN">മലയാളം</option>
-                <option value="hi-IN">हिंदी</option>
+                <option value="hi-IN">हिंदी (Hindi)</option>
+                <option value="ml-IN">മലയാളം (Malayalam)</option>
+                <option value="ta-IN">தமிழ் (Tamil)</option>
+                <option value="te-IN">తెలుగు (Telugu)</option>
+                <option value="mr-IN">मराठी (Marathi)</option>
+                <option value="gu-IN">ગુજરાતી (Gujarati)</option>
                 <option value="en-IN">English</option>
             </select>
         </div>
 
         <section class="tip-card">
-            <h3>🌟 ഇന്നത്തെ ഉപദേശം</h3>
-            <p id="dailyTip">മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.</p>
+            <h3>🌟 आज की सलाह</h3>
+            <p id="dailyTip">मॉनसून में धान की सिंचाई 5-7 दिन में करें।</p>
         </section>
 
         <section class="voice-card">
-            <h2>🎤 എല്ലാം ചോദിക്കൂ – ശബ്ദത്തിൽ!</h2>
-            <p>ഫലം, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.</p>
+            <h2>🎤 सब कुछ पूछें – आवाज़ से!</h2>
+            <p>फसल, मौसम, कीमत, योजना – बोलें या टाइप करें।</p>
             <div class="mic-container">
                 <button id="micBtn" class="mic-btn" disabled>🎤</button>
-                <div class="status" id="status">പറയൂ...</div>
+                <div class="status" id="status">बोलें...</div>
             </div>
             <div class="input-group">
-                <input type="text" id="textInput" class="text-input" placeholder="ഉദാ: Kochi weather അല്ലെങ്കിൽ ടൊമാറ്റോ വില">
-                <button id="sendBtn" class="send-btn">അയയ്ക്കൂ</button>
+                <input type="text" id="textInput" class="text-input" placeholder="उदा: कोच्चि मौसम या टमाटर कीमत">
+                <button id="sendBtn" class="send-btn">भेजें</button>
             </div>
         </section>
 
         <section id="responseSection" class="response-section hidden">
-            <h3>🤖 ഉത്തരം:</h3>
+            <h3>🤖 उत्तर:</h3>
             <div id="responseContent"></div>
         </section>
 
         <nav class="bottom-nav">
-            <button class="nav-btn active" data-section="home">🏠 ഹോം</button>
-            <button class="nav-btn" data-section="weather">☀️ കാലാവസ്ഥ</button>
-            <button class="nav-btn" data-section="mandi">🛒 മാർക്കറ്റ്</button>
-            <button class="nav-btn" data-section="schemes">🏛️ പദ്ധതികൾ</button>
+            <button class="nav-btn active" data-section="home">🏠 होम</button>
+            <button class="nav-btn" data-section="weather">☀️ मौसम</button>
+            <button class="nav-btn" data-section="mandi">🛒 मंडी</button>
+            <button class="nav-btn" data-section="schemes">🏛️ योजनाएँ</button>
         </nav>
 
         <section id="weatherSection" class="section-card hidden">
-            <h2>☀️ IMD കാലാവസ്ഥ (കൊച്ചി)</h2>
-            <input type="text" id="cityInput" placeholder="നഗരം (Kochi)">
-            <button id="weatherBtn">കാണൂ</button>
+            <h2>☀️ IMD मौसम</h2>
+            <input type="text" id="cityInput" placeholder="शहर (उदा: कोच्चि)">
+            <button id="weatherBtn">देखें</button>
             <div id="weatherOutput"></div>
         </section>
 
         <section id="mandiSection" class="section-card hidden">
-            <h2>🛒 മാർക്കറ്റ് വിലകൾ (കേരളം)</h2>
-            <input type="text" id="mandiSearch" placeholder="തിരയൂ: ടൊമാറ്റോ പാലക്കാട്">
+            <h2>🛒 मंडी कीमतें</h2>
+            <input type="text" id="mandiSearch" placeholder="सर्च: टमाटर पालक्काड">
             <select id="commoditySelect">
-                <option value="Tomato">ടൊമാറ്റോ</option>
-                <option value="Onion">ഉള്ളി</option>
-                <option value="Pineapple">പൈനാപ്പിൾ</option>
+                <option value="Tomato">टमाटर</option>
+                <option value="Onion">प्याज</option>
+                <option value="Pineapple">पाइनएप्पल</option>
             </select>
-            <button id="mandiBtn">തിരയൂ</button>
+            <button id="mandiBtn">सर्च</button>
             <div id="mandiOutput"></div>
         </section>
 
