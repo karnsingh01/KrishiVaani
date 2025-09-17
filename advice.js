@@ -17,7 +17,13 @@ exports.handler = async (event, context) => {
     };
     const langName = languageMap[lang] || 'Hindi';
 
-    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${langName}. Query: "${query}". Provide accurate, fast advice on weather (Kochi 26°C, light rain, 18 Sep 2025), mandi prices (Tomato ₹26/kg, Banana ₹30/kg Palakkad), crop problems (yellow leaves = nitrogen deficiency, urea 25kg/acre), schemes (PM-KISAN ₹6000/year). Keep short, helpful.`;
+    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${langName} on 18 Sep 2025. Query: "${query}". Provide accurate, concise advice:
+- Weather: Kochi 26°C, light rain, 82% humidity. Monsoon advice.
+- Mandi prices: Tomato ₹26/kg, Banana ₹30/kg, Onion ₹12/kg (Palakkad). Suggest sell timing.
+- Crop problems: Yellow leaves = nitrogen deficiency, urea 25kg/acre; coconut bud rot = 1% Bordeaux spray.
+- Schemes: PM-KISAN ₹6000/year, Kudumbashree loans.
+- Soil: Laterite soil = NPK 10:10:10, 1kg/coconut tree.
+Keep answers short, actionable, and Kerala-focused.`;
 
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
@@ -45,13 +51,13 @@ exports.handler = async (event, context) => {
   } catch (error) {
     console.error('AI query error:', error);
     const fallbacks = {
-      'hi-IN': 'AI जवाब: फसल समस्या बताएँ – मौसम कोच्चि में 26°C, हल्की बारिश। मंडी: टमाटर ₹26/kg।',
-      'ml-IN': 'AI ഉത്തരം: ഫലപ്രശ്നം പറയൂ – കാലാവസ്ഥ കൊച്ചി 26°C, മഴ. മാർക്കറ്റ്: തക്കാളി ₹26/kg.'
+      'hi-IN': 'AI जवाब: टमाटर ₹26/kg (पालक्काड), कोच्चि 26°C, बारिश। सवाल दोबारा पूछें!',
+      'ml-IN': 'AI ഉത്തരം: തക്കാളി ₹26/kg (പാലക്കാട്), കൊച്ചി 26°C, മഴ. വീണ്ടും ചോദിക്കുക!'
     };
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ solution: fallbacks[lang] || 'AI answer: Ask about crop issue – Kochi weather 26°C, rain. Mandi: Tomato ₹26/kg.' })
+      body: JSON.stringify({ solution: fallbacks[lang] || 'AI answer: Tomato ₹26/kg (Palakkad), Kochi 26°C, rain. Ask again!' })
     };
   }
 };
