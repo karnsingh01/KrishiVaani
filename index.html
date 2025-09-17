@@ -1,109 +1,90 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="ml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KrishiVaani - कृषि सहायक</title>
+    <title>KisanVaani – Kerala Farmer App</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <h1 class="title">🌾 KrishiVaani</h1>
-            <p class="subtitle">आपका कृषि सहायक</p>
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="splash-icon">🌾</div>
+            <h2>KisanVaani ലോഡ് ചെയ്യുന്നു...</h2>
+            <div class="splash-loader"></div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main">
-        <div class="container">
-            <!-- System Status -->
-            <div class="system-status" id="systemStatus">
-                <div class="status-item">
-                    <span class="status-icon" id="httpsStatus">🔒</span>
-                    <span class="status-text">HTTPS: <span id="httpsText">Checking...</span></span>
-                </div>
-                <div class="status-item">
-                    <span class="status-icon" id="browserStatus">🌐</span>
-                    <span class="status-text">Browser: <span id="browserText">Checking...</span></span>
-                </div>
-                <div class="status-item">
-                    <span class="status-icon" id="micStatus">🎤</span>
-                    <span class="status-text">Microphone: <span id="micText">Not tested</span></span>
-                </div>
-            </div>
+    <div class="container" id="appContent" style="display:none;">
+        <header class="header">
+            <h1 class="title">🌿 KisanVaani</h1>
+            <p class="subtitle" id="greeting">നമസ്കാരം! ഇന്നത്തെ ടിപ്പ്: നാളികേരത്തിൽ ബഡ് റോട്ട് പരിശോധിക്കുക.</p>
+        </header>
 
-            <!-- Voice Assistant -->
-            <div class="voice-card">
-                <h2>🎤 आवाज़ से पूछें</h2>
-                <p>फसल की समस्या, बाजार भाव, या मौसम के बारे में बताएं</p>
-
-                <!-- Mic Button -->
-                <div class="mic-container">
-                    <button class="mic-btn" id="micBtn">
-                        <div class="mic-icon">🎤</div>
-                        <div class="mic-pulse"></div>
-                    </button>
-                    <p class="status" id="status">माइक बटन दबाएं और बोलें</p>
-                </div>
-
-                <!-- Transcript -->
-                <div class="transcript-section hidden" id="transcriptSection">
-                    <h3>आपने कहा:</h3>
-                    <p class="transcript" id="transcript">यहां आपके बोले गए शब्द दिखेंगे...</p>
-                </div>
-
-                <!-- Response -->
-                <div class="response-section hidden" id="responseSection">
-                    <h3>🤖 AI का जवाब:</h3>
-                    <div class="response-content" id="responseContent"></div>
-                </div>
-
-                <!-- Error -->
-                <div class="error-section hidden" id="errorSection">
-                    <div class="error-content">
-                        <h3>⚠️ समस्या</h3>
-                        <p class="error-message" id="errorMessage"></p>
-                        <button class="retry-btn" id="retryBtn">फिर कोशिश करें</button>
-                    </div>
-                </div>
-
-                <!-- Text Fallback -->
-                <div class="fallback-section hidden" id="fallbackSection">
-                    <h3>📝 टाइप करके पूछें:</h3>
-                    <div class="input-group">
-                        <input type="text" class="text-input" id="textInput" placeholder="अपना प्रश्न यहां लिखें...">
-                        <button class="send-btn" id="sendBtn">भेजें</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Questions -->
-            <div class="quick-questions">
-                <h3>जल्दी पूछें:</h3>
-                <div class="question-grid">
-                    <button class="question-btn" data-question="गेहूं की कीमत क्या है">गेहूं की कीमत</button>
-                    <button class="question-btn" data-question="आज का मौसम कैसा है">आज का मौसम</button>
-                    <button class="question-btn" data-question="पत्तियां पीली हो रही हैं">पत्तियां पीली</button>
-                    <button class="question-btn" data-question="कीड़े लगे हैं फसल में">कीट की समस्या</button>
-                </div>
-            </div>
-
-            <!-- Help -->
-            <div class="help-section">
-                <h3>📋 उदाहरण प्रश्न:</h3>
-                <ul class="help-list">
-                    <li>"मेरी फसल में पत्तियां पीली हो रही हैं"</li>
-                    <li>"गेहूं की आज की कीमत क्या है?"</li>
-                    <li>"आज का मौसम कैसा रहेगा?"</li>
-                    <li>"कीड़े लगे हैं, क्या करूं?"</li>
-                    <li>"यूरिया खाद कितनी डालनी चाहिए?"</li>
-                </ul>
-            </div>
+        <div class="language-selector">
+            <select id="langSelect">
+                <option value="ml-IN">മലയാളം</option>
+                <option value="hi-IN">हिंदी</option>
+                <option value="en-IN">English</option>
+            </select>
         </div>
-    </main>
+
+        <section class="tip-card">
+            <h3>🌟 ഇന്നത്തെ ഉപദേശം</h3>
+            <p id="dailyTip">മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.</p>
+        </section>
+
+        <section class="voice-card">
+            <h2>🎤 എല്ലാം ചോദിക്കൂ – ശബ്ദത്തിൽ!</h2>
+            <p>ഫലം, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.</p>
+            <div class="mic-container">
+                <button id="micBtn" class="mic-btn" disabled>🎤</button>
+                <div class="status" id="status">പറയൂ...</div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="textInput" class="text-input" placeholder="ഉദാ: Kochi weather അല്ലെങ്കിൽ ടൊമാറ്റോ വില">
+                <button id="sendBtn" class="send-btn">അയയ്ക്കൂ</button>
+            </div>
+        </section>
+
+        <section id="responseSection" class="response-section hidden">
+            <h3>🤖 ഉത്തരം:</h3>
+            <div id="responseContent"></div>
+        </section>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-section="home">🏠 ഹോം</button>
+            <button class="nav-btn" data-section="weather">☀️ കാലാവസ്ഥ</button>
+            <button class="nav-btn" data-section="mandi">🛒 മാർക്കറ്റ്</button>
+            <button class="nav-btn" data-section="schemes">🏛️ പദ്ധതികൾ</button>
+        </nav>
+
+        <section id="weatherSection" class="section-card hidden">
+            <h2>☀️ IMD കാലാവസ്ഥ (കൊച്ചി)</h2>
+            <input type="text" id="cityInput" placeholder="നഗരം (Kochi)">
+            <button id="weatherBtn">കാണൂ</button>
+            <div id="weatherOutput"></div>
+        </section>
+
+        <section id="mandiSection" class="section-card hidden">
+            <h2>🛒 മാർക്കറ്റ് വിലകൾ (കേരളം)</h2>
+            <input type="text" id="mandiSearch" placeholder="തിരയൂ: ടൊമാറ്റോ പാലക്കാട്">
+            <select id="commoditySelect">
+                <option value="Tomato">ടൊമാറ്റോ</option>
+                <option value="Onion">ഉള്ളി</option>
+                <option value="Pineapple">പൈനാപ്പിൾ</option>
+            </select>
+            <button id="mandiBtn">തിരയൂ</button>
+            <div id="mandiOutput"></div>
+        </section>
+
+        <section id="schemesSection" class="section-card hidden">
+            <ul id="schemesList"></ul>
+        </section>
+    </div>
 
     <script src="app.js"></script>
 </body>

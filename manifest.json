@@ -1,0 +1,16 @@
+{
+  "name": "KisanVaani – Kerala Farmer App",
+  "short_name": "KisanVaani",
+  "description": "AI farming assistant in Malayalam for Kerala farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F9F2",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjNENBRjUwIi8+CjxwYXRoIGQ9Ik0xNjAgMTZIMzIgVjE3NkgxNjBWMTZaIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiLz4KPHRleHQgeD0iOTYiIHk9IjEwMCIgZm9udC1mYW1pbHk9Ik51bml0byIgZm9udC1zaXplPSIyNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPksaXNhbjx0ZXh0Pgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
