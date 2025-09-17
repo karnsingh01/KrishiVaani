@@ -1,557 +1,329 @@
-// KrishiVaani Agricultural Voice Assistant - Fresh Complete Version
-class KrishiVaani {
-    constructor() {
-        this.recognition = null;
-        this.synthesis = window.speechSynthesis;
-        this.isListening = false;
-        this.currentTranscript = '';
-        this.finalTranscript = '';
-        this.permissionGranted = false;
+document.addEventListener('DOMContentLoaded', () => {
+    const micBtn = document.getElementById('micBtn');
+    const status = document.getElementById('status');
+    const transcriptSection = document.getElementById('transcriptSection');
+    const transcriptText = document.getElementById('transcript');
+    const responseSection = document.getElementById('responseSection');
+    const responseContent = document.getElementById('responseContent');
+    const errorSection = document.getElementById('errorSection');
+    const errorMessage = document.getElementById('errorMessage');
+    const retryBtn = document.getElementById('retryBtn');
+    const textInput = document.getElementById('textInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fallbackSection = document.getElementById('fallbackSection');
+    const questionBtns = document.querySelectorAll('.question-btn');
+    const httpsText = document.getElementById('httpsText');
+    const browserText = document.getElementById('browserText');
+    const micText = document.getElementById('micText');
+    const httpsStatusIcon = document.getElementById('httpsStatus');
+    const browserStatusIcon = document.getElementById('browserStatus');
+    const micStatusIcon = document.getElementById('micStatus');
+    const langSelect = document.getElementById('langSelect');
 
-        // Agricultural knowledge base
-        this.agriculturalData = {
-            cropProblems: {
-                "पत्तियां पीली": {
-                    diagnosis: "आपकी फसल में नाइट्रोजन की कमी के लक्षण दिख रहे हैं",
-                    solution: "तुरंत यूरिया खाद का छिड़काव करें - 25 किलो प्रति एकड़। साथ ही नियमित सिंचाई करते रहें।",
-                    urgency: "तुरंत कार्रवाई करें - 3-4 दिन में सुधार दिखेगा"
-                },
-                "भूरे धब्बे": {
-                    diagnosis: "फसल में फंगल इन्फेक्शन (ब्लाइट) की समस्या है",
-                    solution: "मैन्कोजेब या कॉपर सल्फेट का स्प्रे करें। शाम के समय छिड़काव करें।",
-                    urgency: "जल्दी इलाज करें - 10-15 दिन में धब्बे कम होने लगेंगे"
-                },
-                "कीड़े लगे": {
-                    diagnosis: "फसल में कीट प्रकोप है - संभवतः बोलवर्म या एफिड",
-                    solution: "नीम का तेल या इमिडाक्लोप्रिड का छिड़काव करें। सुबह या शाम के समय स्प्रे करें।",
-                    urgency: "तुरंत कार्रवाई करें - 2-3 दिन में कीड़ों की संख्या कम हो जाएगी"
-                },
-                "फसल सूख रही": {
-                    diagnosis: "पानी की कमी या जड़ों में समस्या हो सकती है",
-                    solution: "तुरंत सिंचाई करें। मिट्टी की नमी बनाए रखें। जिंक सल्फेट का छिड़काव भी करें।",
-                    urgency: "तुरंत पानी दें - देर करने से फसल खराब हो सकती है"
-                }
-            },
-            marketPrices: {
-                "गेहूं": "गेहूं का वर्तमान भाव ₹2175 प्रति क्विंटल है दिल्ली मंडी में। कल से 2.3% बढ़ोतरी हुई है।",
-                "चावल": "चावल का भाव ₹2850 प्रति क्विंटल है पंजाब मंडी में। 1.8% बढ़ोतरी हुई है।",
-                "टमाटर": "टमाटर का भाव ₹1200 प्रति क्विंटल है महाराष्ट्र मंडी में। 5.2% गिरावट हुई है।",
-                "प्याज": "प्याज का भाव ₹1650 प्रति क्विंटल है कर्नाटक मंडी में। स्थिर भाव चल रहे हैं।",
-                "आलू": "आलू का भाव ₹1300 प्रति क्विंटल है उत्तर प्रदेश मंडी में।"
-            },
-            weather: {
-                "आज": "आज का मौसम साफ है, तापमान 28°C। सिंचाई के लिए अच्छा दिन है।",
-                "कल": "कल आंशिक बादल छाया रहेगा, तापमान 30°C। छिड़काव के लिए उपयुक्त।",
-                "परसों": "परसों हल्की बारिश हो सकती है, तापमान 26°C। बाहरी काम टालें।"
-            },
-            schemes: {
-                "आयुष्मान भारत": "आयुष्मान भारत योजना में प्रति परिवार ₹5 लाख तक का मुफ्त इलाज मिलता है। गरीबी रेखा से नीचे के परिवार इसका फायदा उठा सकते हैं।",
-                "पीएम किसान": "PM-KISAN योजना में किसानों को प्रति वर्ष ₹6000 की सहायता मिलती है। यह तीन किस्तों में दी जाती है।"
-            }
-        };
+    let isListening = false;
+    let recognition;
+    let currentLang = 'hi-IN';
 
-        this.init();
-    }
-
-    init() {
-        console.log('🌾 KrishiVaani Initializing...');
-        this.checkSystemRequirements();
-        this.setupEventListeners();
-        this.updateStatus("सिस्टम तैयार हो रहा है...");
-        console.log('✅ KrishiVaani Ready!');
-    }
-
-    checkSystemRequirements() {
-        const httpsStatus = document.getElementById('httpsStatus');
-        const httpsText = document.getElementById('httpsText');
-        const browserStatus = document.getElementById('browserStatus');
-        const browserText = document.getElementById('browserText');
-        const micStatus = document.getElementById('micStatus');
-        const micText = document.getElementById('micText');
-
-        // Check HTTPS
-        const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
-        if (isHttps) {
-            httpsStatus.textContent = '🟢';
-            httpsText.textContent = 'Secure';
-            httpsText.className = 'status-ready';
+    // Check system status
+    const checkSystemStatus = () => {
+        // HTTPS Status
+        if (window.location.protocol === 'https:') {
+            httpsText.textContent = 'Ready';
+            httpsText.classList.add('status-ready');
+            httpsStatusIcon.textContent = '✅';
         } else {
-            httpsStatus.textContent = '🔴';
-            httpsText.textContent = 'Need HTTPS';
-            httpsText.className = 'status-error';
+            httpsText.textContent = 'Not Secure';
+            httpsText.classList.add('status-error');
+            httpsStatusIcon.textContent = '❌';
+            showError('वॉइस असिस्टेंस केवल HTTPS पर काम करता है।');
         }
 
-        // Check Browser Support
-        const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-        const hasGetUserMedia = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
-
-        if (hasSpeechRecognition && hasGetUserMedia) {
-            browserStatus.textContent = '🟢';
+        // Browser Compatibility
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             browserText.textContent = 'Compatible';
-            browserText.className = 'status-ready';
+            browserText.classList.add('status-ready');
+            browserStatusIcon.textContent = '✅';
+            fallbackSection.classList.add('hidden');
         } else {
-            browserStatus.textContent = '🔴';
-            browserText.textContent = 'Use Chrome/Edge';
-            browserText.className = 'status-error';
+            browserText.textContent = 'Not Compatible';
+            browserText.classList.add('status-error');
+            browserStatusIcon.textContent = '❌';
+            fallbackSection.classList.remove('hidden');
+            showError('आपका ब्राउज़र वॉइस असिस्टेंस का समर्थन नहीं करता है। कृपया टाइप करके पूछें।');
         }
+    };
+    
+    checkSystemStatus();
 
-        // Update mic status
-        micStatus.textContent = '🎤';
-        micText.textContent = 'Ready to test';
-        micText.className = 'status-warning';
+    // Voice recognition setup
+    const setupVoiceRecognition = () => {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = currentLang;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
 
-        // Enable/disable mic button based on system readiness
-        const micBtn = document.getElementById('micBtn');
-        if (isHttps && hasSpeechRecognition && hasGetUserMedia) {
-            micBtn.disabled = false;
-            this.updateStatus("माइक बटन दबाएं और बोलें");
+            recognition.onstart = () => {
+                isListening = true;
+                status.textContent = 'बोलें...';
+                micBtn.classList.add('listening');
+                micText.textContent = 'Listening...';
+                micText.classList.add('status-ready');
+                micStatusIcon.textContent = '✅';
+                hideSections();
+            };
+
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript;
+                transcriptText.textContent = result;
+                transcriptSection.classList.remove('hidden');
+                status.textContent = 'सोच रहा है...';
+                micBtn.classList.remove('listening');
+                micBtn.classList.add('thinking');
+                getResponse(result);
+            };
+
+            recognition.onspeechend = () => {
+                if (isListening) {
+                    recognition.stop();
+                    isListening = false;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                isListening = false;
+                micBtn.classList.remove('listening', 'thinking');
+                micBtn.classList.add('error');
+                if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+                    showError('माइक की अनुमति नहीं दी गई। कृपया इसे सक्षम करें।');
+                    micText.textContent = 'Permission denied';
+                    micText.classList.add('status-error');
+                    micStatusIcon.textContent = '❌';
+                } else if (event.error === 'no-speech') {
+                    showError('कोई आवाज़ नहीं सुनी गई। कृपया फिर से कोशिश करें।');
+                } else {
+                    showError('कुछ गलत हो गया।');
+                }
+                status.textContent = 'माइक बटन दबाएं और बोलें';
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('listening', 'thinking', 'speaking', 'error');
+                status.textContent = 'माइक बटन दबाएं और बोलें';
+            };
         } else {
             micBtn.disabled = true;
-            this.updateStatus("सिस्टम रिक्वायरमेंट्स चेक करें");
-            this.showFallback();
+            showError('आपका ब्राउज़र वॉइस असिस्टेंस का समर्थन नहीं करता है।');
+            status.textContent = 'यह ब्राउज़र काम नहीं करेगा';
+            micText.textContent = 'Not supported';
+            micText.classList.add('status-error');
+            micStatusIcon.textContent = '❌';
         }
-    }
+    };
 
-    setupEventListeners() {
-        const micBtn = document.getElementById('micBtn');
-        const retryBtn = document.getElementById('retryBtn');
-        const sendBtn = document.getElementById('sendBtn');
-        const textInput = document.getElementById('textInput');
-        const questionBtns = document.querySelectorAll('.question-btn');
+    setupVoiceRecognition();
 
-        if (micBtn) {
-            micBtn.addEventListener('click', () => this.startVoiceInput());
-        }
-
-        if (retryBtn) {
-            retryBtn.addEventListener('click', () => this.retryVoiceInput());
-        }
-
-        if (sendBtn) {
-            sendBtn.addEventListener('click', () => this.processTextInput());
-        }
-
-        if (textInput) {
-            textInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.processTextInput();
-                }
-            });
-        }
-
-        questionBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const question = btn.getAttribute('data-question');
-                this.processQuery(question);
-            });
-        });
-
-        console.log('✅ Event listeners setup complete');
-    }
-
-    async startVoiceInput() {
-        console.log('🎤 Starting voice input...');
-        this.hideAllSections();
-        this.updateStatus("माइक की अनुमति मांगी जा रही है...");
-        this.setMicState('requesting');
-
-        try {
-            // Request microphone permission
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
-            });
-
-            console.log('✅ Microphone permission granted');
-
-            // Permission granted, stop the stream
-            stream.getTracks().forEach(track => track.stop());
-
-            // Update status
-            const micText = document.getElementById('micText');
-            if (micText) {
-                micText.textContent = 'Permission granted';
-                micText.className = 'status-ready';
-            }
-
-            this.permissionGranted = true;
-
-            // Initialize speech recognition
-            await this.initializeSpeechRecognition();
-
-        } catch (error) {
-            console.error('❌ Microphone error:', error);
-            this.handleMicrophoneError(error);
-        }
-    }
-
-    async initializeSpeechRecognition() {
-        try {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-            if (!SpeechRecognition) {
-                throw new Error('Speech recognition not supported');
-            }
-
-            console.log('🗣️ Initializing speech recognition...');
-
-            this.recognition = new SpeechRecognition();
-            this.recognition.continuous = false;
-            this.recognition.interimResults = true;
-            this.recognition.lang = 'hi-IN';
-            this.recognition.maxAlternatives = 1;
-
-            this.recognition.onstart = () => {
-                console.log('✅ Speech recognition started');
-                this.isListening = true;
-                this.updateStatus("सुन रहा हूं... बोलिए");
-                this.setMicState('listening');
-                this.showTranscript();
-            };
-
-            this.recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
-                    }
-                }
-
-                // Update transcript display
-                const transcriptDisplay = finalTranscript || interimTranscript;
-                this.updateTranscript(transcriptDisplay);
-
-                if (finalTranscript.trim()) {
-                    console.log('📝 Final transcript:', finalTranscript);
-                    this.finalTranscript = finalTranscript.trim();
-                    this.updateStatus("AI सोच रहा है...");
-                    this.setMicState('thinking');
-                    setTimeout(() => {
-                        this.processQuery(this.finalTranscript);
-                    }, 1200);
-                }
-            };
-
-            this.recognition.onerror = (event) => {
-                console.error('❌ Speech recognition error:', event.error);
-                this.isListening = false;
-                this.handleSpeechError(event.error);
-            };
-
-            this.recognition.onend = () => {
-                console.log('🔚 Speech recognition ended');
-                this.isListening = false;
-                if (!this.finalTranscript) {
-                    this.updateStatus("कुछ नहीं सुनाई दिया। कृपया दोबारा कोशिश करें।");
-                    this.setMicState('error');
-                    this.showError("स्पष्ट आवाज में बोलें और दोबारा कोशिश करें।");
-                }
-            };
-
-            // Start recognition
-            this.recognition.start();
-            console.log('🎙️ Speech recognition started');
-
-        } catch (error) {
-            console.error('❌ Recognition initialization error:', error);
-            this.handleMicrophoneError(error);
-        }
-    }
-
-    handleMicrophoneError(error) {
-        let errorMessage = "माइक्रोफोन की समस्या हुई।";
-
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            errorMessage = "माइक्रोफोन की अनुमति नहीं मिली। कृपया ब्राउज़र सेटिंग में माइक को allow करें।";
-        } else if (error.name === 'NotFoundError') {
-            errorMessage = "कोई माइक्रोफोन नहीं मिला। कृपया माइक्रोफोन कनेक्ट करें।";
-        } else if (error.message === 'Speech recognition not supported') {
-            errorMessage = "यह ब्राउज़र समर्थित नहीं है। कृपया Chrome या Edge का उपयोग करें।";
-        }
-
-        console.error('❌ Microphone error handled:', errorMessage);
-
-        this.showError(errorMessage);
-        this.setMicState('error');
-        this.showFallback();
-
-        // Update mic status
-        const micText = document.getElementById('micText');
-        if (micText) {
-            micText.textContent = 'Error occurred';
-            micText.className = 'status-error';
-        }
-    }
-
-    handleSpeechError(errorType) {
-        let message = "आवाज पहचान में समस्या हुई।";
-
-        switch (errorType) {
-            case 'not-allowed':
-            case 'permission-denied':
-                message = "माइक्रोफोन की अनुमति नहीं मिली। कृपया allow करें।";
-                break;
-            case 'no-speech':
-                message = "कुछ नहीं सुनाई दिया। कृपया साफ आवाज में दोबारा बोलें।";
-                break;
-            case 'audio-capture':
-                message = "माइक्रोफोन की समस्या। कृपया चेक करें कि माइक काम कर रहा है।";
-                break;
-            case 'network':
-                message = "नेटवर्क की समस्या। इंटरनेट कनेक्शन चेक करें।";
-                break;
-            case 'aborted':
-                message = "आवाज पहचान रुक गई। कृपया दोबारा कोशिश करें।";
-                break;
-        }
-
-        console.error('🔊 Speech error handled:', message);
-
-        this.showError(message);
-        this.setMicState('error');
-    }
-
-    processQuery(query) {
-        if (!query || !query.trim()) {
-            this.showError("कोई प्रश्न नहीं मिला। कृपया दोबारा कोशिश करें।");
-            return;
-        }
-
-        console.log('🤖 Processing query:', query);
-
-        const lowerQuery = query.toLowerCase();
-        const response = this.getAIResponse(lowerQuery);
-
-        this.showResponse(response);
-        this.speakResponse(response);
-    }
-
-    getAIResponse(query) {
-        console.log('🧠 Generating AI response for:', query);
-
-        // Check crop problems
-        for (const [problem, data] of Object.entries(this.agriculturalData.cropProblems)) {
-            if (query.includes(problem.toLowerCase())) {
-                return {
-                    type: 'crop_problem',
-                    diagnosis: data.diagnosis,
-                    solution: data.solution,
-                    urgency: data.urgency
-                };
-            }
-        }
-
-        // Check market prices
-        for (const [crop, priceInfo] of Object.entries(this.agriculturalData.marketPrices)) {
-            if (query.includes(crop) && (query.includes('कीमत') || query.includes('भाव') || query.includes('rate'))) {
-                return {
-                    type: 'market_price',
-                    diagnosis: `${crop} की कीमत की जानकारी`,
-                    solution: priceInfo,
-                    urgency: "नवीनतम बाजार भाव"
-                };
-            }
-        }
-
-        // Check weather
-        if (query.includes('मौसम') || query.includes('weather')) {
-            return {
-                type: 'weather',
-                diagnosis: "मौसम की जानकारी",
-                solution: this.agriculturalData.weather["आज"],
-                urgency: "आज के लिए सलाह"
-            };
-        }
-
-        // Check government schemes
-        for (const [scheme, info] of Object.entries(this.agriculturalData.schemes)) {
-            if (query.includes(scheme.toLowerCase())) {
-                return {
-                    type: 'scheme',
-                    diagnosis: `${scheme} योजना की जानकारी`,
-                    solution: info,
-                    urgency: "सरकारी योजना"
-                };
-            }
-        }
-
-        // Default response
-        return {
-            type: 'general',
-            diagnosis: "आपका प्रश्न मिल गया",
-            solution: "मैं आपकी कृषि संबंधी समस्याओं में मदद के लिए यहां हूं। कृपया फसल की बीमारी, कीमतों, या मौसम के बारे में पूछें।",
-            urgency: "अधिक जानकारी के लिए स्पष्ट प्रश्न पूछें"
-        };
-    }
-
-    speakResponse(response) {
-        if ('speechSynthesis' in window) {
-            console.log('🔊 Speaking response...');
-            this.updateStatus("जवाब दे रहा हूं...");
-            this.setMicState('speaking');
-
-            const text = `${response.diagnosis}। ${response.solution}`;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'hi-IN';
-            utterance.rate = 0.9;
-            utterance.volume = 0.8;
-
-            utterance.onend = () => {
-                console.log('✅ Speaking completed');
-                this.updateStatus("माइक बटन दबाएं और बोलें");
-                this.setMicState('ready');
-            };
-
-            utterance.onerror = () => {
-                console.log('❌ Speaking error');
-                this.updateStatus("माइक बटन दबाएं और बोलें");
-                this.setMicState('ready');
-            };
-
-            this.synthesis.speak(utterance);
+    // Event Listeners
+    micBtn.addEventListener('click', () => {
+        if (!isListening) {
+            recognition.start();
         } else {
-            console.log('🔇 Speech synthesis not available');
-            this.updateStatus("माइक बटन दबाएं और बोलें");
-            this.setMicState('ready');
+            recognition.stop();
+        }
+    });
+
+    langSelect.addEventListener('change', (event) => {
+        currentLang = event.target.value;
+        setupVoiceRecognition(); // Re-initialize with new language
+        status.textContent = 'माइक बटन दबाएं और बोलें'; // Reset status text
+        if (currentLang !== 'hi-IN') {
+            alert('Language changed. Note: The demo responses are still in Hindi.');
+        }
+    });
+
+    sendBtn.addEventListener('click', () => {
+        const query = textInput.value;
+        if (query.trim() !== '') {
+            processQuery(query);
+        }
+    });
+
+    textInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = textInput.value;
+            if (query.trim() !== '') {
+                processQuery(query);
+            }
+        }
+    });
+
+    retryBtn.addEventListener('click', () => {
+        hideSections();
+    });
+
+    questionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const question = btn.getAttribute('data-question');
+            processQuery(question);
+        });
+    });
+
+    // Helper Functions
+    function hideSections() {
+        transcriptSection.classList.add('hidden');
+        responseSection.classList.add('hidden');
+        errorSection.classList.add('hidden');
+        responseContent.innerHTML = '';
+        errorMessage.textContent = '';
+        textInput.value = '';
+    }
+
+    function showError(message) {
+        hideSections();
+        errorSection.classList.remove('hidden');
+        errorMessage.textContent = message;
+    }
+
+    async function getResponse(query) {
+        micBtn.classList.remove('thinking');
+        micBtn.classList.add('speaking');
+        status.textContent = 'जवाब दे रहा है...';
+
+        try {
+            const response = await mockApiCall(query);
+            micBtn.classList.remove('speaking');
+            status.textContent = 'माइक बटन दबाएं और बोलें';
+            displayResponse(response);
+        } catch (err) {
+            showError('AI से जवाब प्राप्त करने में समस्या हुई।');
+            micBtn.classList.remove('speaking');
+            status.textContent = 'माइक बटन दबाएं और बोलें';
         }
     }
 
-    processTextInput() {
-        const textInput = document.getElementById('textInput');
-        const query = textInput?.value.trim();
-
-        if (query) {
-            console.log('⌨️ Processing text input:', query);
-            textInput.value = '';
-            this.updateTranscript(query);
-            this.showTranscript();
-            this.processQuery(query);
-        }
+    function processQuery(query) {
+        hideSections();
+        transcriptText.textContent = query;
+        transcriptSection.classList.remove('hidden');
+        textInput.value = '';
+        status.textContent = 'सोच रहा है...';
+        getResponse(query);
     }
 
-    retryVoiceInput() {
-        console.log('🔄 Retrying voice input...');
-        this.hideAllSections();
-        this.finalTranscript = '';
-        this.currentTranscript = '';
+    function displayResponse(response) {
+        responseSection.classList.remove('hidden');
+        responseContent.innerHTML = ''; // Clear previous content
 
-        if (this.recognition) {
-            this.recognition.stop();
-            this.recognition = null;
-        }
+        if (response.type === 'info') {
+            responseContent.innerHTML = `<p>${response.text}</p>`;
+        } else if (response.type === 'diagnose') {
+            const diagnosisDiv = document.createElement('div');
+            diagnosisDiv.classList.add('diagnosis');
+            diagnosisDiv.innerHTML = `<h4>पहचान:</h4><p>${response.diagnosis}</p>`;
+            responseContent.appendChild(diagnosisDiv);
 
-        if (this.synthesis) {
-            this.synthesis.cancel();
-        }
-
-        setTimeout(() => {
-            this.startVoiceInput();
-        }, 500);
-    }
-
-    // UI Helper Methods
-    updateStatus(message) {
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-            statusEl.textContent = message;
-        }
-        console.log('📱 Status updated:', message);
-    }
-
-    setMicState(state) {
-        const micBtn = document.getElementById('micBtn');
-        if (micBtn) {
-            micBtn.className = `mic-btn ${state}`;
-        }
-        console.log('🎤 Mic state:', state);
-    }
-
-    updateTranscript(text) {
-        const transcriptEl = document.getElementById('transcript');
-        if (transcriptEl) {
-            transcriptEl.textContent = text;
-        }
-    }
-
-    showTranscript() {
-        const section = document.getElementById('transcriptSection');
-        if (section) {
-            section.classList.remove('hidden');
-        }
-    }
-
-    showResponse(response) {
-        const section = document.getElementById('responseSection');
-        const content = document.getElementById('responseContent');
-
-        if (section && content) {
-            let html = `<div class="diagnosis"><strong>🔍 निदान:</strong> ${response.diagnosis}</div>`;
-            html += `<div class="solution"><strong>💡 समाधान:</strong> ${response.solution}</div>`;
-
+            if (response.solution) {
+                const solutionDiv = document.createElement('div');
+                solutionDiv.classList.add('solution');
+                solutionDiv.innerHTML = `<h4>समाधान:</h4><p>${response.solution}</p>`;
+                responseContent.appendChild(solutionDiv);
+            }
+            
             if (response.urgency) {
-                html += `<div class="urgency"><strong>⚡ जरूरी:</strong> ${response.urgency}</div>`;
+                const urgencyDiv = document.createElement('div');
+                urgencyDiv.classList.add('urgency');
+                urgencyDiv.textContent = `तत्काल: ${response.urgency}`;
+                responseContent.appendChild(urgencyDiv);
             }
+        } else if (response.type === 'mandi') {
+            const mandiHtml = `
+                <h4>आज का ${response.item} भाव</h4>
+                <p>${response.location}: ${response.price}</p>
+            `;
+            responseContent.innerHTML = mandiHtml;
+        } else if (response.type === 'scheme') {
+            const schemeHtml = `
+                <h4>सरकारी योजना: ${response.schemeName}</h4>
+                <p>${response.description}</p>
+            `;
+            responseContent.innerHTML = schemeHtml;
+        }
 
-            content.innerHTML = html;
-            section.classList.remove('hidden');
+        // Text-to-speech
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(response.text);
+            utterance.lang = 'hi-IN';
+            window.speechSynthesis.speak(utterance);
         }
     }
-
-    showError(message) {
-        const section = document.getElementById('errorSection');
-        const messageEl = document.getElementById('errorMessage');
-
-        if (section && messageEl) {
-            messageEl.textContent = message;
-            section.classList.remove('hidden');
-        }
-    }
-
-    showFallback() {
-        const section = document.getElementById('fallbackSection');
-        if (section) {
-            section.classList.remove('hidden');
-        }
-    }
-
-    hideAllSections() {
-        const sections = ['transcriptSection', 'responseSection', 'errorSection'];
-        sections.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.classList.add('hidden');
-            }
+    
+    // Mock API Call - Simulates a real API response from government and AI tools
+    function mockApiCall(query) {
+        const queryLower = query.toLowerCase();
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                let responseData;
+                if (queryLower.includes('कीमत') || queryLower.includes('bhav') || queryLower.includes('price')) {
+                    if (queryLower.includes('गेहूं') || queryLower.includes('wheat')) {
+                        responseData = {
+                            type: 'mandi',
+                            text: 'आज दिल्ली की आजादपुर मंडी में गेहूं का भाव ₹2,500 प्रति क्विंटल है।',
+                            item: 'गेहूं',
+                            location: 'दिल्ली, आजादपुर मंडी',
+                            price: '₹2,500 प्रति क्विंटल'
+                        };
+                    } else if (queryLower.includes('टमाटर') || queryLower.includes('tomato')) {
+                        responseData = {
+                            type: 'mandi',
+                            text: 'आज दिल्ली की आजादपुर मंडी में टमाटर का भाव ₹2,200 प्रति क्विंटल है।',
+                            item: 'टमाटर',
+                            location: 'दिल्ली, आजादपुर मंडी',
+                            price: '₹2,200 प्रति क्विंटल'
+                        };
+                    } else {
+                         responseData = {
+                            type: 'info',
+                            text: 'आप किस सब्जी या फल का भाव जानना चाहते हैं? मैं मंडी भाव की जानकारी दे सकता हूं।',
+                        };
+                    }
+                } else if (queryLower.includes('मौसम') || queryLower.includes('weather') || queryLower.includes('mausam')) {
+                    responseData = {
+                        type: 'info',
+                        text: 'आज का मौसम साफ रहेगा। अगले 24 घंटों में बारिश की कोई संभावना नहीं है।',
+                    };
+                } else if (queryLower.includes('पत्तियां पीली') || queryLower.includes('yellow leaves')) {
+                    responseData = {
+                        type: 'diagnose',
+                        text: 'आपकी फसल में नाइट्रोजन की कमी हो सकती है। यह पानी की अधिकता का भी संकेत हो सकता है। आप प्रति एकड़ 20-30 किलोग्राम यूरिया का छिड़काव करें और पानी की मात्रा कम करें।',
+                        diagnosis: 'पोषक तत्व की कमी',
+                        solution: 'आप प्रति एकड़ 20-30 किलोग्राम यूरिया का छिड़काव करें और पानी की मात्रा कम करें।',
+                        urgency: 'तुरंत कार्यवाही करें'
+                    };
+                } else if (queryLower.includes('कीड़े') || queryLower.includes('pest')) {
+                    responseData = {
+                        type: 'diagnose',
+                        text: 'आपकी फसल में पत्ती खाने वाले कीटों का हमला हुआ है। यह फसल को बहुत नुकसान पहुंचा सकता है। आप इमामेक्टिन बेंजोएट 5% एसजी का 250 ग्राम प्रति एकड़ के हिसाब से स्प्रे करें।',
+                        diagnosis: 'कीट का हमला',
+                        solution: 'आप इमामेक्टिन बेंजोएट 5% एसजी का 250 ग्राम प्रति एकड़ के हिसाब से स्प्रे करें।',
+                        urgency: 'तुरंत कार्यवाही करें'
+                    };
+                } else if (queryLower.includes('सरकारी योजना') || queryLower.includes('govt scheme')) {
+                    responseData = {
+                        type: 'scheme',
+                        text: 'प्रधानमंत्री किसान सम्मान निधि (PM-KISAN) योजना के तहत किसानों को ₹6,000 की वार्षिक सहायता मिलती है।',
+                        schemeName: 'प्रधानमंत्री किसान सम्मान निधि (PM-KISAN)',
+                        description: 'इस योजना के तहत, सरकार किसानों को ₹6,000 की वार्षिक सहायता तीन बराबर किस्तों में सीधे उनके बैंक खाते में देती है।',
+                    };
+                } else {
+                    responseData = {
+                        type: 'info',
+                        text: 'माफ कीजिये, मुझे आपका प्रश्न समझ नहीं आया।',
+                    };
+                }
+                resolve(responseData);
+            }, 2000); // Simulate API delay
         });
     }
-}
-
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌾 KrishiVaani DOM loaded, starting app...');
-
-    try {
-        new KrishiVaani();
-    } catch (error) {
-        console.error('❌ Failed to initialize KrishiVaani:', error);
-
-        // Show error in UI if possible
-        const statusEl = document.getElementById('status');
-        if (statusEl) {
-            statusEl.textContent = 'ऐप लोड करने में समस्या हुई। पेज रीफ्रेश करें।';
-            statusEl.style.color = '#ef4444';
-        }
-    }
-});
-
-// Global error handler
-window.addEventListener('error', (event) => {
-    console.error('🚨 Global error:', event.error);
 });
