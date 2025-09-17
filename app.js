@@ -4,17 +4,6 @@ class KisanVaaniApp {
     this.synthesis = window.speechSynthesis;
     this.currentLang = 'hi-IN'; // Default Hindi
     this.permissionGranted = false;
-    this.commodities = [
-      { name: 'Tomato', hindi: 'टमाटर', malayalam: 'തക്കാളി' },
-      { name: 'Onion', hindi: 'प्याज', malayalam: 'സവോള' },
-      { name: 'Pineapple', hindi: 'अनानास', malayalam: 'കൈതച്ചക്ക' },
-      { name: 'Banana', hindi: 'केला', malayalam: 'വാഴപ്പഴം' },
-      { name: 'Mango', hindi: 'आम', malayalam: 'മാമ്പഴം' },
-      { name: 'Potato', hindi: 'आलू', malayalam: 'ഉരുളക്കിഴങ്ങ്' },
-      { name: 'Brinjal', hindi: 'बैंगन', malayalam: 'വഴുതന' },
-      { name: 'Cabbage', hindi: 'पत्तागोभी', malayalam: 'മുട്ടക്കോസ്' },
-      // Add more crops as needed
-    ];
     this.agriculturalData = {
       cropProblems: {
         'पत्तियां पीली': { diagnosis: 'नाइट्रोजन की कमी', solution: 'यूरिया 25kg/एकड़ छिड़कें।' },
@@ -29,9 +18,9 @@ class KisanVaaniApp {
       }
     };
     this.schemes = [
-      { name: 'PM-KISAN', desc: '₹6000/वर्ष छोटे किसानों को।', link: 'https://pmkisan.gov.in/' },
-      { name: 'कुदुंबश्री', desc: 'केरल में किसान लोन।', link: 'https://www.kudumbashree.org/' },
-      { name: 'PMFBY', desc: 'फसल बीमा योजना।', link: 'https://pmfby.gov.in/' }
+      { name: "PM-KISAN", desc: "₹6000/वर्ष छोटे किसानों को।", link: "https://pmkisan.gov.in/" },
+      { name: "कुदुंबश्री", desc: "केरल में किसान लोन।", link: "https://www.kudumbashree.org/" },
+      { name: "PMFBY", desc: "फसल बीमा योजना।", link: "https://pmfby.gov.in/" }
     ];
     this.initApp();
   }
@@ -50,7 +39,6 @@ class KisanVaaniApp {
     this.checkSystemRequirements();
     this.setupEventListeners();
     this.populateSchemes();
-    this.populateCommodities();
   }
 
   async checkSystemRequirements() {
@@ -62,6 +50,7 @@ class KisanVaaniApp {
     }
 
     try {
+      // Explicit Mic Permission for Speech API
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
       stream.getTracks().forEach(track => track.stop());
       this.permissionGranted = true;
@@ -73,6 +62,7 @@ class KisanVaaniApp {
       micBtn.disabled = true;
     }
 
+    // Check Speech API Support
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       status.textContent += ' ब्राउज़र सपोर्ट नहीं (Chrome/Edge यूज़ करें)।';
     }
@@ -93,7 +83,6 @@ class KisanVaaniApp {
     langSelect.addEventListener('change', (e) => {
       this.currentLang = e.target.value;
       document.getElementById('status').textContent = `भाषा बदली: ${e.target.options[e.target.selectedIndex].text} – दोबारा माइक दबाएँ।`;
-      this.populateCommodities(); // Update dropdown labels
     });
 
     weatherBtn.addEventListener('click', () => {
@@ -140,7 +129,7 @@ class KisanVaaniApp {
 
     this.recognition = new SpeechRecognition();
     this.recognition.lang = this.currentLang;
-    this.recognition.continuous = false;
+    this.recognition.continuous = false; // Fix for short queries
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
 
@@ -189,15 +178,8 @@ class KisanVaaniApp {
       const city = lowerQuery.includes('kochi') || lowerQuery.includes('കൊച്ചി') ? 'Kochi' : 'Kochi';
       response = await this.fetchWeather(city);
     } else if (lowerQuery.includes('कीमत') || lowerQuery.includes('price') || lowerQuery.includes('വില') || lowerQuery.includes('விலை')) {
-      // Match commodity from query
-      const commodityMatch = this.commodities.find(c => 
-        lowerQuery.includes(c.hindi.toLowerCase()) || 
-        lowerQuery.includes(c.malayalam.toLowerCase()) || 
-        lowerQuery.includes(c.name.toLowerCase())
-      );
-      const commodity = commodityMatch ? commodityMatch.name : 'Tomato';
-      const district = lowerQuery.includes('palakkad') || lowerQuery.includes('പാലക്കാട്') ? 'Palakkad' : 'Palakkad';
-      response = await this.fetchMandiPrices(commodity, district);
+      const commodity = lowerQuery.includes('tomato') || lowerQuery.includes('ടൊമാറ്റോ') ? 'Tomato' : 'Tomato';
+      response = await this.fetchMandiPrices(commodity, 'Palakkad');
     } else if (lowerQuery.includes('योजना') || lowerQuery.includes('scheme') || lowerQuery.includes('പദ്ധതി')) {
       response = { solution: 'PM-KISAN: ₹6000/वर्ष। लिंक: pmkisan.gov.in' };
     } else {
@@ -209,13 +191,15 @@ class KisanVaaniApp {
 
   async fetchWeather(city) {
     try {
+      // IMD Backend Call (Fixed URL from PDF)
       const res = await fetch(`/.netlify/functions/weather?city=${city}&lang=${this.currentLang}`);
       if (!res.ok) throw new Error('Backend त्रुटि');
       const data = await res.json();
       return data;
     } catch (err) {
       console.error('Weather fetch error:', err);
-      const apiKey = 'b1b15e88fa797225412429c1c50c122a1'; // Demo – prod में अपना
+      // Fallback Direct OpenWeatherMap (Free, No Backend Needed)
+      const apiKey = 'b1b15e88fa797225412429c1c50c122a1'; // Demo key – prod में अपना लें
       const owmRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric&lang=hi`);
       if (owmRes.ok) {
         const owmData = await owmRes.json();
@@ -231,45 +215,24 @@ class KisanVaaniApp {
 
   async fetchMandiPrices(commodity, district) {
     try {
-      const res = await fetch(`/.netlify/functions/mandi?commodity=${encodeURIComponent(commodity)}&district=${encodeURIComponent(district)}&lang=${this.currentLang}`);
-      if (res.ok) {
-        const data = await res.json();
-        document.getElementById('mandiOutput').innerHTML = `<div class="solution">${data.solution}</div>`;
-        return data;
-      }
-    } catch (backendErr) {
-      console.error('Backend Mandi error:', backendErr);
-    }
-
-    // Direct Fallback to data.gov.in JSON
-    try {
-      const apiUrl = `https://api.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi?api-key=NOKEY&format=json&limit=50`;
+      // Backend Call (Fixed JSON)
+      const res = await fetch(`/.netlify/functions/mandi?commodity=${commodity}&district=${district}&lang=${this.currentLang}`);
+      if (!res.ok) throw new Error('Backend त्रुटि');
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.error('Mandi fetch error:', err);
+      // Fallback Direct data.gov.in JSON
+      const apiUrl = `https://api.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi?api-key=NOKEY&format=json&limit=10`;
       const directRes = await fetch(apiUrl);
       if (directRes.ok) {
         const directData = await directRes.json();
-        const item = directData.records.find(r => 
-          r.commodity_name.toLowerCase() === commodity.toLowerCase() && 
-          r.market_name.toLowerCase().includes(district.toLowerCase())
-        ) || directData.records.find(r => r.commodity_name.toLowerCase() === commodity.toLowerCase()) || directData.records[0];
-        const modalPrice = item.modal_price || '26';
-        const minPrice = item.min_price || '22';
-        const maxPrice = item.max_price || '30';
-        const solution = `${commodity} की कीमत (${district}, 18 Sep 2025): मोडल ₹${modalPrice}/kg (मिन ₹${minPrice}, मैक्स ₹${maxPrice})। बेचने का अच्छा समय।`;
-        document.getElementById('mandiOutput').innerHTML = `<div class="solution">${solution}</div>`;
-        return { solution };
+        const item = directData.records.find(r => r.commodity_name === commodity && r.market_name.includes(district)) || directData.records[0];
+        const price = item ? `₹${item.modal_price}/क्विंटल (मिन ${item.min_price}, मैक्स ${item.max_price})` : '₹26/kg (औसत)';
+        return { solution: `${commodity} की ${district} में कीमत (18 Sep 2025): ${price}। बेचने का अच्छा समय।` };
       }
-    } catch (directErr) {
-      console.error('Direct Mandi error:', directErr);
+      return { solution: 'मंडी डेटा उपलब्ध नहीं। फॉलबैक: टमाटर ₹26/kg पालक्काड में।' };
     }
-
-    // Ultimate Fallback
-    const fallbackPrices = {
-      Tomato: 26, Onion: 12, Pineapple: 40, Banana: 30, Mango: 50, Potato: 15, Brinjal: 20, Cabbage: 18
-    };
-    const modalPrice = fallbackPrices[commodity] || 26;
-    const solution = `मंडी डेटा उपलब्ध नहीं। फॉलबैक: ${commodity} ₹${modalPrice}/kg (${district}, 18 Sep 2025)।`;
-    document.getElementById('mandiOutput').innerHTML = `<div class="solution">${solution}</div>`;
-    return { solution };
   }
 
   async fetchAdvice(query) {
@@ -284,6 +247,7 @@ class KisanVaaniApp {
     }
   }
 
+  // Other methods (speakResponse, showResponse, etc.) as before...
   speakResponse(response) {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(response.solution);
@@ -309,18 +273,6 @@ class KisanVaaniApp {
       const li = document.createElement('li');
       li.innerHTML = `<strong>${scheme.name}:</strong> ${scheme.desc} <a href="${scheme.link}" target="_blank">आवेदन करें</a>`;
       list.appendChild(li);
-    });
-  }
-
-  populateCommodities() {
-    const select = document.getElementById('commoditySelect');
-    select.innerHTML = ''; // Clear existing
-    const labelKey = this.currentLang === 'ml-IN' ? 'malayalam' : 'hindi';
-    this.commodities.forEach(commodity => {
-      const option = document.createElement('option');
-      option.value = commodity.name;
-      option.textContent = commodity[labelKey];
-      select.appendChild(option);
     });
   }
 
