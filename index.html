@@ -42,8 +42,8 @@
         </section>
 
         <section class="voice-card">
-            <h2>🎤 सब कुछ पूछें – AI से!</h2>
-            <p>फसल, मौसम, कीमत – बोलें या टाइप करें। AI तेज़ जवाब देगा।</p>
+            <h2>🎤 AI से पूछें – फसल, मौसम, कीमत!</h2>
+            <p>बोलें या टाइप करें। AI तेज़ जवाब देगा।</p>
             <div class="mic-container">
                 <button id="micBtn" class="mic-btn" disabled>🎤 AI</button>
                 <div class="status" id="status">AI तैयार – बोलें!</div>
@@ -64,6 +64,8 @@
             <button class="nav-btn" data-section="weather">☀️ मौसम</button>
             <button class="nav-btn" data-section="mandi">🛒 मंडी</button>
             <button class="nav-btn" data-section="schemes">🏛️ योजनाएँ</button>
+            <button class="nav-btn" data-section="pest">🐞 कीट/रोग</button>
+            <button class="nav-btn" data-section="soil">🌱 मिट्टी</button>
         </nav>
 
         <section id="weatherSection" class="section-card hidden">
@@ -77,7 +79,13 @@
             <h2>🛒 मंडी कीमतें (AI से)</h2>
             <input type="text" id="mandiSearch" class="text-input" placeholder="सर्च: केला पालक्काड">
             <select id="commoditySelect">
-                <!-- Dynamically populated -->
+                <option value="Tomato">टमाटर</option>
+                <option value="Onion">प्याज</option>
+                <option value="Banana">केला</option>
+                <option value="Mango">आम</option>
+                <option value="Potato">आलू</option>
+                <option value="Brinjal">बैंगन</option>
+                <option value="Cabbage">पत्तागोभी</option>
             </select>
             <button id="mandiBtn" class="send-btn">AI से पूछें</button>
             <div id="mandiOutput" class="response-content"></div>
@@ -85,9 +93,23 @@
 
         <section id="schemesSection" class="section-card hidden">
             <h2>🏛️ योजनाएँ (AI से)</h2>
-            <ul id="schemesList" class="help-list"></ul>
+            <input type="text" id="schemeInput" class="text-input" placeholder="योजना (उदा: PM-KISAN)">
             <button id="schemesBtn" class="send-btn">AI से पूछें</button>
             <div id="schemesOutput" class="response-content"></div>
+        </section>
+
+        <section id="pestSection" class="section-card hidden">
+            <h2>🐞 कीट/रोग (AI से)</h2>
+            <input type="text" id="pestInput" class="text-input" placeholder="उदा: पत्तियां पीली">
+            <button id="pestBtn" class="send-btn">AI से पूछें</button>
+            <div id="pestOutput" class="response-content"></div>
+        </section>
+
+        <section id="soilSection" class="section-card hidden">
+            <h2>🌱 मिट्टी (AI से)</h2>
+            <input type="text" id="soilInput" class="text-input" placeholder="उदा: लेटराइट मिट्टी धान">
+            <button id="soilBtn" class="send-btn">AI से पूछें</button>
+            <div id="soilOutput" class="response-content"></div>
         </section>
     </div>
 
