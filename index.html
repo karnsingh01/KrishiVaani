@@ -9,40 +9,23 @@
 </head>
 <body>
     <header class="header">
-        <div class="container">
+        <div class="container nav-container">
             <h1 class="title">🌾 KrishiVaani</h1>
-            <p class="subtitle">आपका कृषि सहायक</p>
+            <nav class="navbar">
+                <a href="#home" class="nav-link active">होम</a>
+                <a href="#mandi" class="nav-link">मंडी</a>
+                <a href="#weather" class="nav-link">मौसम</a>
+                <a href="#schemes" class="nav-link">योजनाएं</a>
+            </nav>
         </div>
     </header>
 
-    <main class="main">
-        <div class="container">
-            <div class="system-status" id="systemStatus">
-                <div class="status-item">
-                    <span class="status-icon" id="httpsStatus">🔒</span>
-                    <span class="status-text">HTTPS: <span id="httpsText">Checking...</span></span>
-                </div>
-                <div class="status-item">
-                    <span class="status-icon" id="browserStatus">🌐</span>
-                    <span class="status-text">Browser: <span id="browserText">Checking...</span></span>
-                </div>
-                <div class="status-item">
-                    <span class="status-icon" id="micStatus">🎤</span>
-                    <span class="status-text">Microphone: <span id="micText">Not tested</span></span>
-                </div>
-            </div>
-
+    <main class="main container">
+        
+        <section id="home" class="content-section active">
             <div class="voice-card">
-                <div class="language-selector">
-                    <label for="langSelect">भाषा चुनें:</label>
-                    <select id="langSelect">
-                        <option value="hi-IN">हिन्दी (Hindi)</option>
-                        <option value="en-US">English (US)</option>
-                        <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
-                    </select>
-                </div>
                 <h2>🎤 आवाज़ से पूछें</h2>
-                <p>फसल की समस्या, बाजार भाव, या मौसम के बारे में बताएं</p>
+                <p class="voice-subtitle">फसल की समस्या, बाजार भाव, या मौसम के बारे में बताएं</p>
                 
                 <div class="mic-container">
                     <button class="mic-btn" id="micBtn">
@@ -51,17 +34,21 @@
                     </button>
                     <p class="status" id="status">माइक बटन दबाएं और बोलें</p>
                 </div>
+                
+                <div class="ai-text-container" id="aiTextContainer">
+                    <div class="ai-text-card">
+                        <p>"मजबूत जड़ों वाला किसान ही देश की नींव मजबूत करता है।"</p>
+                    </div>
+                </div>
 
                 <div class="transcript-section hidden" id="transcriptSection">
                     <h3>आपने कहा:</h3>
-                    <p class="transcript" id="transcript">यहां आपके बोले गए शब्द दिखेंगे...</p>
+                    <p class="transcript" id="transcript"></p>
                 </div>
-
                 <div class="response-section hidden" id="responseSection">
                     <h3>🤖 AI का जवाब:</h3>
                     <div class="response-content" id="responseContent"></div>
                 </div>
-
                 <div class="error-section hidden" id="errorSection">
                     <div class="error-content">
                         <h3>⚠️ समस्या</h3>
@@ -69,61 +56,78 @@
                         <button class="retry-btn" id="retryBtn">फिर कोशिश करें</button>
                     </div>
                 </div>
-
-                <div class="fallback-section hidden" id="fallbackSection">
-                    <h3>📝 टाइप करके पूछें:</h3>
-                    <div class="input-group">
-                        <input type="text" class="text-input" id="textInput" placeholder="अपना प्रश्न यहां लिखें...">
-                        <button class="send-btn" id="sendBtn">भेजें</button>
+            </div>
+        </section>
+        
+        <section id="mandi" class="content-section hidden">
+            <div class="info-card">
+                <h2>मंडियों के भाव</h2>
+                <div class="search-bar">
+                    <input type="text" id="mandiSearch" placeholder="सब्जी या फल का नाम खोजें..." />
+                    <button id="searchBtn">खोजें</button>
+                </div>
+                <div id="mandiResults">
+                    <p>खोज करने के लिए ऊपर टाइप करें, या नीचे देखें:</p>
+                    <div class="mandi-data">
+                        <h4>दिल्ली मंडी भाव (आज)</h4>
+                        <ul id="mandiList">
+                            <li>गेहूं: ₹2,500/क्विंटल</li>
+                            <li>आलू: ₹1,500/क्विंटल</li>
+                            <li>टमाटर: ₹2,200/क्विंटल</li>
+                            <li>प्याज: ₹1,800/क्विंटल</li>
+                            <li>गोभी: ₹2,000/क्विंटल</li>
+                            <li>सेब: ₹8,000/क्विंटल</li>
+                            <li>अंगूर: ₹5,500/क्विंटल</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-
-            <div class="info-card" id="mandiSchemes">
-                <h3>मंडियों के भाव & सरकारी योजनाएं</h3>
-                <div class="mandi-data">
-                    <h4>आज के ताज़ा भाव (मंडी, दिल्ली)</h4>
-                    <ul id="mandiList">
-                        <li>गेहूं: ₹2,500/क्विंटल</li>
-                        <li>आलू: ₹1,500/क्विंटल</li>
-                        <li>टमाटर: ₹2,200/क्विंटल</li>
-                    </ul>
+        </section>
+        
+        <section id="weather" class="content-section hidden">
+            <div class="info-card">
+                <h2>मौसम की रिपोर्ट</h2>
+                <div id="weatherReport">
+                    <p>यहां आज का मौसम अपडेट होगा।</p>
                 </div>
+                <button id="getWeatherBtn" class="btn">आज का मौसम अपडेट करें</button>
+            </div>
+        </section>
+        
+        <section id="schemes" class="content-section hidden">
+            <div class="info-card">
+                <h2>सरकारी योजनाएं</h2>
                 <div class="govt-schemes">
-                    <h4>सरकारी योजनाएं</h4>
                     <ul id="schemeList">
                         <li>
-                            <a href="#" target="_blank">प्रधानमंत्री किसान सम्मान निधि (PM-KISAN)</a>
+                            <a href="https://pmkisan.gov.in/" target="_blank">
+                                <h4>प्रधानमंत्री किसान सम्मान निधि (PM-KISAN)</h4>
+                            </a>
                             <p>किसानों को ₹6,000 की वार्षिक सहायता।</p>
                         </li>
                         <li>
-                            <a href="#" target="_blank">प्रधानमंत्री फसल बीमा योजना</a>
+                            <a href="https://pmfby.gov.in/" target="_blank">
+                                <h4>प्रधानमंत्री फसल बीमा योजना</h4>
+                            </a>
                             <p>फसलों का बीमा, प्राकृतिक आपदाओं से सुरक्षा।</p>
+                        </li>
+                        <li>
+                            <a href="https://enam.gov.in/" target="_blank">
+                                <h4>ई-नाम (e-NAM)</h4>
+                            </a>
+                            <p>किसानों के लिए ऑनलाइन कृषि मंडी।</p>
+                        </li>
+                        <li>
+                            <a href="https://soilhealth.dac.gov.in/" target="_blank">
+                                <h4>मृदा स्वास्थ्य कार्ड योजना</h4>
+                            </a>
+                            <p>मिट्टी के स्वास्थ्य की जांच और पोषण प्रबंधन।</p>
                         </li>
                     </ul>
                 </div>
             </div>
+        </section>
 
-            <div class="quick-questions">
-                <h3>जल्दी पूछें:</h3>
-                <div class="question-grid">
-                    <button class="question-btn" data-question="आज गेहूं का मंडी भाव क्या है?">गेहूं का भाव</button>
-                    <button class="question-btn" data-question="आज का मौसम कैसा रहेगा?">आज का मौसम</button>
-                    <button class="question-btn" data-question="फसल में पत्तियां पीली हो रही हैं, क्या करूं?">पत्तियां पीली</button>
-                    <button class="question-btn" data-question="सरकारी योजनाएं बताएं">सरकारी योजनाएं</button>
-                </div>
-            </div>
-
-            <div class="help-section">
-                <h3>📋 उदाहरण प्रश्न:</h3>
-                <ul class="help-list">
-                    <li>"मेरी फसल में कीड़े लगे हैं, क्या करूं?"</li>
-                    <li>"दिल्ली में टमाटर का भाव क्या है?"</li>
-                    <li>"कल का मौसम कैसा रहेगा?"</li>
-                    <li>"यूरिया खाद के बारे में बताएं"</li>
-                </ul>
-            </div>
-        </div>
     </main>
 
     <script src="app.js"></script>
