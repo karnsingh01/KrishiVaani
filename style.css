@@ -1,4 +1,4 @@
-/* KrishiVaani Agricultural Voice Assistant - Complete Styles */
+/* KrishiVaani Agricultural Voice Assistant Styles */
 :root {
   --background: #F7F9F2;
   --foreground: #222222;
@@ -350,14 +350,6 @@ body {
 .retry-btn {
   background: var(--error-color);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
 }
 
 .retry-btn:hover {
@@ -368,14 +360,6 @@ body {
 .send-btn {
   background: var(--primary);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
 }
 
 .send-btn:hover {
@@ -447,6 +431,71 @@ body {
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 }
 
+/* New Info Card */
+.info-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.info-card h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.mandi-data, .govt-schemes {
+  margin-bottom: 1.5rem;
+}
+
+.mandi-data h4, .govt-schemes h4 {
+  color: var(--vibrant-blue);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.mandi-data ul, .govt-schemes ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.mandi-data li, .govt-schemes li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.govt-schemes a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.govt-schemes a:hover {
+  text-decoration: underline;
+}
+
+.govt-schemes p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Language Selector */
+.language-selector {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.language-selector select {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
 /* Help Section */
 .help-section {
   background: var(--card-bg);
@@ -486,34 +535,34 @@ body {
   .container {
     padding: 0 0.5rem;
   }
-
+  
   .title {
     font-size: 2rem;
   }
-
+  
   .voice-card {
     padding: 1.5rem;
     border-radius: 1.5rem;
   }
-
+  
   .mic-btn {
     width: 100px;
     height: 100px;
     font-size: 2.5rem;
   }
-
+  
   .system-status {
     grid-template-columns: 1fr;
   }
-
+  
   .question-grid {
     grid-template-columns: 1fr;
   }
-
+  
   .input-group {
     flex-direction: column;
   }
-
+  
   .send-btn {
     margin-top: 0.5rem;
   }
@@ -524,11 +573,11 @@ body {
     padding: 1rem;
     border-radius: 1rem;
   }
-
+  
   .title {
     font-size: 1.5rem;
   }
-
+  
   .mic-btn {
     width: 90px;
     height: 90px;
