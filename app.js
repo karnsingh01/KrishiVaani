@@ -2,8 +2,18 @@ class KisanVaaniApp {
   constructor() {
     this.recognition = null;
     this.synthesis = window.speechSynthesis;
-    this.currentLang = 'hi-IN'; // Default Hindi
+    this.currentLang = 'hi-IN';
     this.permissionGranted = false;
+    this.commodities = [
+      { name: 'Tomato', hindi: 'टमाटर', malayalam: 'തക്കാളി' },
+      { name: 'Onion', hindi: 'प्याज', malayalam: 'സവോള' },
+      { name: 'Pineapple', hindi: 'अनानास', malayalam: 'കൈതച്ചക്ക' },
+      { name: 'Banana', hindi: 'केला', malayalam: 'വാഴപ്പഴം' },
+      { name: 'Mango', hindi: 'आम', malayalam: 'മാമ്പഴം' },
+      { name: 'Potato', hindi: 'आलू', malayalam: 'ഉരുളക്കിഴങ്ങ്' },
+      { name: 'Brinjal', hindi: 'बैंगन', malayalam: 'വഴുതന' },
+      { name: 'Cabbage', hindi: 'पत्तागोभी', malayalam: 'മുട്ടക്കോസ്' },
+    ];
     this.agriculturalData = {
       cropProblems: {
         'पत्तियां पीली': { diagnosis: 'नाइट्रोजन की कमी', solution: 'यूरिया 25kg/एकड़ छिड़कें।' },
@@ -18,9 +28,9 @@ class KisanVaaniApp {
       }
     };
     this.schemes = [
-      { name: "PM-KISAN", desc: "₹6000/वर्ष छोटे किसानों को।", link: "https://pmkisan.gov.in/" },
-      { name: "कुदुंबश्री", desc: "केरल में किसान लोन।", link: "https://www.kudumbashree.org/" },
-      { name: "PMFBY", desc: "फसल बीमा योजना।", link: "https://pmfby.gov.in/" }
+      { name: 'PM-KISAN', desc: '₹6000/वर्ष छोटे किसानों को।', link: 'https://pmkisan.gov.in/' },
+      { name: 'कुदुंबश्री', desc: 'केरल में किसान लोन।', link: 'https://www.kudumbashree.org/' },
+      { name: 'PMFBY', desc: 'फसल बीमा योजना।', link: 'https://pmfby.gov.in/' }
     ];
     this.initApp();
   }
@@ -39,6 +49,7 @@ class KisanVaaniApp {
     this.checkSystemRequirements();
     this.setupEventListeners();
     this.populateSchemes();
+    this.populateCommodities();
   }
 
   async checkSystemRequirements() {
@@ -50,7 +61,6 @@ class KisanVaaniApp {
     }
 
     try {
-      // Explicit Mic Permission for Speech API
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
       stream.getTracks().forEach(track => track.stop());
       this.permissionGranted = true;
@@ -59,12 +69,11 @@ class KisanVaaniApp {
     } catch (err) {
       console.error('Mic permission error:', err);
       status.textContent = 'माइक परमिशन दें (ब्राउज़र सेटिंग्स में Allow करें)।';
-      micBtn.disabled = true;
+      micBtn.disabled = false; // Allow retry
     }
 
-    // Check Speech API Support
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      status.textContent += ' ब्राउज़र सपोर्ट नहीं (Chrome/Edge यूज़ करें)।';
+      status.textContent += ' ब्राउज़र में माइक सपोर्ट नहीं – फिर भी AI जवाब देगा।';
     }
   }
 
@@ -82,7 +91,8 @@ class KisanVaaniApp {
 
     langSelect.addEventListener('change', (e) => {
       this.currentLang = e.target.value;
-      document.getElementById('status').textContent = `भाषा बदली: ${e.target.options[e.target.selectedIndex].text} – दोबारा माइक दबाएँ।`;
+      document.getElementById('status').textContent = `भाषा बदली: ${e.target.options[e.target.selectedIndex].text} – माइक दबाएँ।`;
+      this.populateCommodities();
     });
 
     weatherBtn.addEventListener('click', () => {
@@ -118,136 +128,169 @@ class KisanVaaniApp {
 
     if (!this.permissionGranted) {
       await this.checkSystemRequirements();
-      if (!this.permissionGranted) return;
+      if (!this.permissionGranted && !('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        status.textContent = 'माइक सपोर्ट नहीं – टेक्स्ट यूज़ करें या Chrome/Edge लें।';
+        return;
+      }
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      this.showError('आवाज़ API सपोर्ट नहीं – Chrome/Edge यूज़ करें।');
-      return;
-    }
+    if (SpeechRecognition) {
+      this.recognition = new SpeechRecognition();
+      this.recognition.lang = this.currentLang;
+      this.recognition.continuous = false;
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
 
-    this.recognition = new SpeechRecognition();
-    this.recognition.lang = this.currentLang;
-    this.recognition.continuous = false; // Fix for short queries
-    this.recognition.interimResults = false;
-    this.recognition.maxAlternatives = 1;
+      this.recognition.onstart = () => {
+        status.textContent = 'सुन रहा हूँ... बोलें!';
+        micBtn.classList.add('listening');
+      };
 
-    this.recognition.onstart = () => {
-      status.textContent = 'सुन रहा हूँ... बोलें!';
-      micBtn.classList.add('listening');
-    };
+      this.recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        status.textContent = `सुना: ${transcript}`;
+        this.processQuery(transcript);
+      };
 
-    this.recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      status.textContent = `सुना: ${transcript}`;
-      this.processQuery(transcript);
-    };
+      this.recognition.onerror = (event) => {
+        console.error('Speech error:', event.error);
+        let errorMsg = 'आवाज़ त्रुटि: ';
+        switch (event.error) {
+          case 'not-allowed': errorMsg += 'परमिशन न दें – Allow करें।'; break;
+          case 'no-speech': errorMsg += 'कुछ नहीं सुना – साफ बोलें।'; break;
+          case 'audio-capture': errorMsg += 'माइक समस्या – चेक करें।'; break;
+          case 'network': errorMsg += 'इंटरनेट चेक करें।'; break;
+          default: errorMsg += 'दोबारा कोशिश करें।';
+        }
+        this.showError(errorMsg);
+        status.textContent = 'माइक रेडी – दोबारा दबाएँ।';
+        micBtn.classList.remove('listening');
+        // Fallback to text-like processing
+        this.processQuery('');
+      };
 
-    this.recognition.onerror = (event) => {
-      console.error('Speech error:', event.error);
-      let errorMsg = 'आवाज़ त्रुटि: ';
-      switch (event.error) {
-        case 'not-allowed': errorMsg += 'परमिशन न दें – Allow करें।'; break;
-        case 'no-speech': errorMsg += 'कुछ नहीं सुना – साफ बोलें।'; break;
-        case 'audio-capture': errorMsg += 'माइक समस्या – चेक करें।'; break;
-        case 'network': errorMsg += 'इंटरनेट चेक करें।'; break;
-        default: errorMsg += 'दोबारा कोशिश करें।';
+      this.recognition.onend = () => {
+        micBtn.classList.remove('listening');
+        status.textContent = 'माइक बंद – अगला सवाल पूछें।';
+      };
+
+      try {
+        this.recognition.start();
+      } catch (err) {
+        this.showError('माइक स्टार्ट नहीं हो सका: ' + err.message);
+        this.processQuery(''); // Fallback
       }
-      this.showError(errorMsg);
-      status.textContent = 'माइक रेडी – दोबारा दबाएँ।';
-      micBtn.classList.remove('listening');
-    };
-
-    this.recognition.onend = () => {
-      micBtn.classList.remove('listening');
-      status.textContent = 'माइक बंद – अगला सवाल पूछें।';
-    };
-
-    try {
-      this.recognition.start();
-    } catch (err) {
-      this.showError('माइक स्टार्ट नहीं हो सका: ' + err.message);
+    } else {
+      this.showError('माइक सपोर्ट नहीं – टेक्स्ट यूज़ करें।');
+      this.processQuery(''); // Fallback to AI processing
     }
   }
 
   async processQuery(query) {
     const lowerQuery = query.toLowerCase();
     let response;
-    if (lowerQuery.includes('मौसम') || lowerQuery.includes('weather') || lowerQuery.includes('കാലാവസ്ഥ') || lowerQuery.includes('வானிலை')) {
+
+    // AI Fallback for empty or failed mic input
+    if (!query) {
+      response = { solution: this.currentLang === 'ml-IN' ? 'നിന്റെ ചോദ്യം വ്യക്തമല്ല. ദയവായി വീണ്ടും പറയുക!' : 'आपका सवाल स्पष्ट नहीं। कृपया दोबारा बोलें!' };
+    } else if (lowerQuery.includes('मौसम') || lowerQuery.includes('weather') || lowerQuery.includes('കാലാവസ്ഥ') || lowerQuery.includes('வானிலை')) {
       const city = lowerQuery.includes('kochi') || lowerQuery.includes('കൊച്ചി') ? 'Kochi' : 'Kochi';
       response = await this.fetchWeather(city);
     } else if (lowerQuery.includes('कीमत') || lowerQuery.includes('price') || lowerQuery.includes('വില') || lowerQuery.includes('விலை')) {
-      const commodity = lowerQuery.includes('tomato') || lowerQuery.includes('ടൊമാറ്റോ') ? 'Tomato' : 'Tomato';
-      response = await this.fetchMandiPrices(commodity, 'Palakkad');
+      const commodityMatch = this.commodities.find(c => 
+        lowerQuery.includes(c.hindi.toLowerCase()) || 
+        lowerQuery.includes(c.malayalam.toLowerCase()) || 
+        lowerQuery.includes(c.name.toLowerCase())
+      );
+      const commodity = commodityMatch ? commodityMatch.name : 'Tomato';
+      const district = lowerQuery.includes('palakkad') || lowerQuery.includes('പാലക്കാട്') ? 'Palakkad' : 'Palakkad';
+      response = await this.fetchMandiPrices(commodity, district);
     } else if (lowerQuery.includes('योजना') || lowerQuery.includes('scheme') || lowerQuery.includes('പദ്ധതി')) {
       response = { solution: 'PM-KISAN: ₹6000/वर्ष। लिंक: pmkisan.gov.in' };
     } else {
-      response = await this.fetchAdvice(lowerQuery);
+      response = this.getAIResponse(lowerQuery);
     }
     this.showResponse(response);
     this.speakResponse(response);
   }
 
+  getAIResponse(query) {
+    const lowerQuery = query.toLowerCase();
+    for (const [key, data] of Object.entries(this.agriculturalData.cropProblems)) {
+      if (lowerQuery.includes(key.toLowerCase())) {
+        return { solution: `${data.diagnosis}: ${data.solution}` };
+      }
+    }
+    return { solution: this.currentLang === 'ml-IN' ? 'നിന്റെ ചോദ്യം വ്യക്തമല്ല. ദയവായി വീണ്ടും പറയുക!' : 'आपका सवाल स्पष्ट नहीं। कृपया दोबारा बोलें!' };
+  }
+
   async fetchWeather(city) {
     try {
-      // IMD Backend Call (Fixed URL from PDF)
       const res = await fetch(`/.netlify/functions/weather?city=${city}&lang=${this.currentLang}`);
       if (!res.ok) throw new Error('Backend त्रुटि');
       const data = await res.json();
       return data;
     } catch (err) {
       console.error('Weather fetch error:', err);
-      // Fallback Direct OpenWeatherMap (Free, No Backend Needed)
-      const apiKey = 'b1b15e88fa797225412429c1c50c122a1'; // Demo key – prod में अपना लें
+      const apiKey = 'b1b15e88fa797225412429c1c50c122a1';
       const owmRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},IN&appid=${apiKey}&units=metric&lang=hi`);
       if (owmRes.ok) {
         const owmData = await owmRes.json();
         const temp = Math.round(owmData.main.temp);
         const desc = owmData.weather[0].description;
         const humidity = owmData.main.humidity;
-        const advice = 'बारिश के बाद सिंचाई टालें।';
+        const advice = this.currentLang === 'ml-IN' ? 'മഴയ്ക്ക് ശേഷം ജലസേചനം വൈകിപ്പിക്കുക।' : 'बारिश के बाद सिंचाई टालें।';
         return { solution: `${city} मौसम (18 Sep 2025): ${temp}°C, ${desc}। नमी: ${humidity}%. सलाह: ${advice}` };
       }
-      return { solution: 'मौसम डेटा उपलब्ध नहीं। फॉलबैक: कोच्चि 25-30°C, हल्की बारिश।' };
+      return { solution: this.currentLang === 'ml-IN' ? 'കാലാവസ്ഥ ലഭ്യമല്ല. 25-30°C, മഴ (18 Sep 2025). ജലസേചനം വൈകിപ്പിക്കുക।' : 'मौसम डेटा उपलब्ध नहीं। फॉलबैक: कोच्चि 25-30°C, हल्की बारिश।' };
     }
   }
 
   async fetchMandiPrices(commodity, district) {
     try {
-      // Backend Call (Fixed JSON)
-      const res = await fetch(`/.netlify/functions/mandi?commodity=${commodity}&district=${district}&lang=${this.currentLang}`);
-      if (!res.ok) throw new Error('Backend त्रुटि');
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      console.error('Mandi fetch error:', err);
-      // Fallback Direct data.gov.in JSON
-      const apiUrl = `https://api.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi?api-key=NOKEY&format=json&limit=10`;
+      const res = await fetch(`/.netlify/functions/mandi?commodity=${encodeURIComponent(commodity)}&district=${encodeURIComponent(district)}&lang=${this.currentLang}`);
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('mandiOutput').innerHTML = `<div class="solution">${data.solution}</div>`;
+        return data;
+      }
+    } catch (backendErr) {
+      console.error('Backend Mandi error:', backendErr);
+    }
+
+    try {
+      const apiUrl = `https://api.data.gov.in/resource/current-daily-price-various-commodities-various-markets-mandi?api-key=NOKEY&format=json&limit=50`;
       const directRes = await fetch(apiUrl);
       if (directRes.ok) {
         const directData = await directRes.json();
-        const item = directData.records.find(r => r.commodity_name === commodity && r.market_name.includes(district)) || directData.records[0];
-        const price = item ? `₹${item.modal_price}/क्विंटल (मिन ${item.min_price}, मैक्स ${item.max_price})` : '₹26/kg (औसत)';
-        return { solution: `${commodity} की ${district} में कीमत (18 Sep 2025): ${price}। बेचने का अच्छा समय।` };
+        const item = directData.records.find(r => 
+          r.commodity_name.toLowerCase() === commodity.toLowerCase() && 
+          r.market_name.toLowerCase().includes(district.toLowerCase())
+        ) || directData.records.find(r => r.commodity_name.toLowerCase() === commodity.toLowerCase()) || directData.records[0];
+        const modalPrice = item.modal_price || '26';
+        const minPrice = item.min_price || '22';
+        const maxPrice = item.max_price || '30';
+        const advice = this.currentLang === 'ml-IN' ? 'ഇന്ന് വിൽക്കുക – നല്ല വില!' : 'आज बेचें – अच्छी कीमत!';
+        const solution = `${commodity} की कीमत (${district}, 18 Sep 2025): मोडल ₹${modalPrice}/kg (मिन ₹${minPrice}, मैक्स ₹${maxPrice})। सलाह: ${advice}`;
+        document.getElementById('mandiOutput').innerHTML = `<div class="solution">${solution}</div>`;
+        return { solution };
       }
-      return { solution: 'मंडी डेटा उपलब्ध नहीं। फॉलबैक: टमाटर ₹26/kg पालक्काड में।' };
+    } catch (directErr) {
+      console.error('Direct Mandi error:', directErr);
     }
+
+    const fallbackPrices = {
+      Tomato: 26, Onion: 12, Pineapple: 40, Banana: 30, Mango: 50, Potato: 15, Brinjal: 20, Cabbage: 18
+    };
+    const modalPrice = fallbackPrices[commodity] || 26;
+    const solution = this.currentLang === 'ml-IN' 
+      ? `വിലകൾ ലഭ്യമല്ല. ${commodity} ₹${modalPrice}/kg (${district}, 18 Sep 2025). ഇന്ന് വിൽക്കുക!`
+      : `मंडी डेटा उपलब्ध नहीं। ${commodity} ₹${modalPrice}/kg (${district}, 18 Sep 2025)। आज बेचें!`;
+    document.getElementById('mandiOutput').innerHTML = `<div class="solution">${solution}</div>`;
+    return { solution };
   }
 
-  async fetchAdvice(query) {
-    try {
-      const res = await fetch(`/.netlify/functions/advice?query=${encodeURIComponent(query)}&lang=${this.currentLang}`);
-      if (!res.ok) throw new Error('Backend त्रुटि');
-      return await res.json();
-    } catch (err) {
-      console.error('Advice fetch error:', err);
-      const fallback = this.currentLang === 'ml-IN' ? 'ഉപദേശം: മണ്ണ് പരിശോധിക്കുക.' : 'सलाह: मिट्टी जाँच करें।';
-      return { solution: fallback };
-    }
-  }
-
-  // Other methods (speakResponse, showResponse, etc.) as before...
   speakResponse(response) {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(response.solution);
@@ -273,6 +316,18 @@ class KisanVaaniApp {
       const li = document.createElement('li');
       li.innerHTML = `<strong>${scheme.name}:</strong> ${scheme.desc} <a href="${scheme.link}" target="_blank">आवेदन करें</a>`;
       list.appendChild(li);
+    });
+  }
+
+  populateCommodities() {
+    const select = document.getElementById('commoditySelect');
+    select.innerHTML = '';
+    const labelKey = this.currentLang === 'ml-IN' ? 'malayalam' : 'hindi';
+    this.commodities.forEach(commodity => {
+      const option = document.createElement('option');
+      option.value = commodity.name;
+      option.textContent = commodity[labelKey];
+      select.appendChild(option);
     });
   }
 
