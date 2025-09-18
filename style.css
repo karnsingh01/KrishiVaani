@@ -96,7 +96,7 @@ body {
 }
 
 .mic-btn.listening {
-  animation: pulse 2s infinite;
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
@@ -186,7 +186,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 999;
-  animation: fadeOut 3s forwards;
+  animation: fadeOut 2s forwards;
 }
 
 .splash-content {
