@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KisanVaani – केरल किसान ऐप</title>
+    <title>KisanVaani – भारतीय किसान ऐप</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
@@ -42,20 +42,20 @@
         </section>
 
         <section class="voice-card">
-            <h2>🎤 AI से पूछें – फसल, मौसम, कीमत!</h2>
-            <p>बोलें या टाइप करें। Grok AI तेज़ जवाब देगा।</p>
+            <h2>🎤 AI से पूछें – फसल, कीट, मिट्टी!</h2>
+            <p>बोलें या टाइप करें। AI तेज़ जवाब देगा।</p>
             <div class="mic-container">
-                <button id="micBtn" class="mic-btn" disabled>🎤 Grok AI</button>
-                <div class="status" id="status">Grok AI तैयार – बोलें!</div>
+                <button id="micBtn" class="mic-btn" disabled>🎤 AI</button>
+                <div class="status" id="status">AI तैयार – बोलें!</div>
             </div>
             <div class="input-group">
                 <input type="text" id="textInput" class="text-input" placeholder="उदा: केला कीमत पालक्काड">
-                <button id="sendBtn" class="send-btn">Grok AI से पूछें</button>
+                <button id="sendBtn" class="send-btn">AI से पूछें</button>
             </div>
         </section>
 
         <section id="responseSection" class="response-section hidden">
-            <h3>🤖 Grok AI उत्तर:</h3>
+            <h3>🤖 AI उत्तर:</h3>
             <div id="responseContent"></div>
         </section>
 
@@ -69,14 +69,14 @@
         </nav>
 
         <section id="weatherSection" class="section-card hidden">
-            <h2>☀️ मौसम (Grok AI से)</h2>
+            <h2>☀️ मौसम (OpenWeatherMap से)</h2>
             <input type="text" id="cityInput" class="text-input" placeholder="शहर (उदा: कोच्चि)">
-            <button id="weatherBtn" class="send-btn">Grok AI से पूछें</button>
+            <button id="weatherBtn" class="send-btn">मौसम देखें</button>
             <div id="weatherOutput" class="response-content"></div>
         </section>
 
         <section id="mandiSection" class="section-card hidden">
-            <h2>🛒 मंडी कीमतें (Grok AI से)</h2>
+            <h2>🛒 मंडी कीमतें (data.gov.in से)</h2>
             <input type="text" id="mandiSearch" class="text-input" placeholder="सर्च: केला पालक्काड">
             <select id="commoditySelect">
                 <option value="Tomato">टमाटर</option>
@@ -87,28 +87,28 @@
                 <option value="Brinjal">बैंगन</option>
                 <option value="Cabbage">पत्तागोभी</option>
             </select>
-            <button id="mandiBtn" class="send-btn">Grok AI से पूछें</button>
+            <button id="mandiBtn" class="send-btn">कीमत देखें</button>
             <div id="mandiOutput" class="response-content"></div>
         </section>
 
         <section id="schemesSection" class="section-card hidden">
-            <h2>🏛️ योजनाएँ (Grok AI से)</h2>
+            <h2>🏛️ योजनाएँ (सरकारी साइट्स से)</h2>
             <input type="text" id="schemeInput" class="text-input" placeholder="योजना (उदा: PM-KISAN)">
-            <button id="schemesBtn" class="send-btn">Grok AI से पूछें</button>
+            <button id="schemesBtn" class="send-btn">डिटेल्स देखें</button>
             <div id="schemesOutput" class="response-content"></div>
         </section>
 
         <section id="pestSection" class="section-card hidden">
-            <h2>🐞 कीट/रोग (Grok AI से)</h2>
+            <h2>🐞 कीट/रोग (AI से)</h2>
             <input type="text" id="pestInput" class="text-input" placeholder="उदा: पत्तियां पीली">
-            <button id="pestBtn" class="send-btn">Grok AI से पूछें</button>
+            <button id="pestBtn" class="send-btn">सलाह लें</button>
             <div id="pestOutput" class="response-content"></div>
         </section>
 
         <section id="soilSection" class="section-card hidden">
-            <h2>🌱 मिट्टी (Grok AI से)</h2>
+            <h2>🌱 मिट्टी (AI से)</h2>
             <input type="text" id="soilInput" class="text-input" placeholder="उदा: लेटराइट मिट्टी धान">
-            <button id="soilBtn" class="send-btn">Grok AI से पूछें</button>
+            <button id="soilBtn" class="send-btn">सलाह लें</button>
             <div id="soilOutput" class="response-content"></div>
         </section>
     </div>
