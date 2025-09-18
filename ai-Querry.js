@@ -17,13 +17,14 @@ exports.handler = async (event, context) => {
     };
     const langName = languageMap[lang] || 'Hindi';
 
-    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${langName} on 18 Sep 2025. Query: "${query}". Provide accurate, concise advice:
-- Weather: Kochi 26°C, light rain, 82% humidity. Monsoon advice.
-- Mandi prices: Tomato ₹26/kg, Banana ₹30/kg, Onion ₹12/kg (Palakkad). Suggest sell timing.
+    const prompt = `You are KisanVaani, an AI farming assistant for Kerala farmers. Answer in ${langName} on 18 Sep 2025, 12:03 PM IST. Query: "${query}". Provide accurate, concise advice:
+- Weather: Kochi 26°C, light rain, 82% humidity; monsoon irrigation advice for Kuttanad paddy.
+- Mandi prices: Tomato ₹26/kg, Banana ₹30/kg, Onion ₹12/kg, Mango ₹50/kg (Palakkad). Suggest sell timing.
 - Crop problems: Yellow leaves = nitrogen deficiency, urea 25kg/acre; coconut bud rot = 1% Bordeaux spray.
-- Schemes: PM-KISAN ₹6000/year, Kudumbashree loans.
-- Soil: Laterite soil = NPK 10:10:10, 1kg/coconut tree.
-Keep answers short, actionable, and Kerala-focused.`;
+- Schemes: PM-KISAN ₹6000/year, Kudumbashree loans, Krishi Bhavan subsidies.
+- Soil: Laterite = NPK 10:10:10, 1kg/coconut tree; alluvial = DAP 20kg/acre for paddy.
+- Irrigation: Monsoon-based pump scheduling (e.g., delay 3 days if rain).
+Keep answers short, actionable, Kerala-focused.`;
 
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
@@ -52,7 +53,7 @@ Keep answers short, actionable, and Kerala-focused.`;
     console.error('AI query error:', error);
     const fallbacks = {
       'hi-IN': 'AI जवाब: टमाटर ₹26/kg (पालक्काड), कोच्चि 26°C, बारिश। सवाल दोबारा पूछें!',
-      'ml-IN': 'AI ഉത്തരം: തക്കാളി ₹26/kg (പാലക്കാട്), കൊച്ചി 26°C, മഴ. വീണ്ടും ചോദിക്കുക!'
+      'ml-IN': 'AI ഉത്തരം: തക്കാളി ₹26/kg (പാലക്കാട്), കൊച്ചി 26°C, മഴ। വീണ്ടും ചോദിക്കുക!'
     };
     return {
       statusCode: 500,
