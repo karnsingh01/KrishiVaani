@@ -21,9 +21,9 @@ class KisanVaaniApp {
       document.getElementById('appContent').style.display = 'block';
     }, 2000);
 
-    const greetings = ['नमस्ते, कोच्चि के किसान!', 'हाय, पालक्काड किसान!'];
+    const greetings = ['नमस्ते, कोच्चि के किसान!', 'हाय, पालक्काड किसान!', 'नमस्ते, त्रिशूर!'];
     document.getElementById('greeting').textContent = greetings[Math.floor(Math.random() * greetings.length)];
-    const tips = ['मॉनसून में धान की सिंचाई 5-7 दिन में करें।', 'नारियल में बड रॉट के लिए बोर्डो स्प्रे करें।'];
+    const tips = ['मॉनसून में धान की सिंचाई 5-7 दिन में करें।', 'नारियल में बड रॉट के लिए बोर्डो स्प्रे करें।', 'केले की फसल में पानी का स्तर चेक करें।'];
     document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
 
     this.checkMic();
@@ -74,32 +74,32 @@ class KisanVaaniApp {
 
     weatherBtn.addEventListener('click', () => {
       const city = document.getElementById('cityInput').value || 'Kochi';
-      this.processQuery(`मौसम ${city} में`);
+      this.processQuery(`मौसम ${city} में, 18 Sep 2025`);
       document.getElementById('weatherOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
     });
 
     mandiBtn.addEventListener('click', () => {
       const commodity = document.getElementById('commoditySelect').value || 'Tomato';
       const district = document.getElementById('mandiSearch').value || 'Palakkad';
-      this.processQuery(`${commodity} की कीमत ${district} में`);
+      this.processQuery(`${commodity} की कीमत ${district} में, 18 Sep 2025`);
       document.getElementById('mandiOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
     });
 
     schemesBtn.addEventListener('click', () => {
       const scheme = document.getElementById('schemeInput').value || 'PM-KISAN';
-      this.processQuery(`${scheme} योजना की जानकारी`);
+      this.processQuery(`${scheme} योजना की जानकारी, केरल के लिए`);
       document.getElementById('schemesOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
     });
 
     pestBtn.addEventListener('click', () => {
       const issue = document.getElementById('pestInput').value || 'पत्तियां पीली';
-      this.processQuery(`फसल समस्या: ${issue}`);
+      this.processQuery(`फसल समस्या: ${issue}, समाधान बताएँ`);
       document.getElementById('pestOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
     });
 
     soilBtn.addEventListener('click', () => {
       const soil = document.getElementById('soilInput').value || 'लेटराइट मिट्टी धान';
-      this.processQuery(`मिट्टी: ${soil}`);
+      this.processQuery(`मिट्टी: ${soil}, उर्वरक सलाह`);
       document.getElementById('soilOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
     });
 
@@ -139,8 +139,14 @@ class KisanVaaniApp {
 
       this.recognition.onerror = (event) => {
         console.error('Speech error:', event.error);
-        status.textContent = 'माइक त्रुटि – टेक्स्ट यूज़ करें।';
-        this.processQuery(''); // AI fallback
+        let errorMsg = 'माइक त्रुटि: ';
+        switch (event.error) {
+          case 'not-allowed': errorMsg += 'परमिशन दें।'; break;
+          case 'no-speech': errorMsg += 'कुछ नहीं सुना।'; break;
+          default: errorMsg += 'दोबारा कोशिश करें।';
+        }
+        status.textContent = errorMsg + ' AI टेक्स्ट से जवाब देगा।';
+        this.processQuery('');
       };
 
       this.recognition.onend = () => {
@@ -163,32 +169,34 @@ class KisanVaaniApp {
   async processQuery(query) {
     const status = document.getElementById('status');
     if (!query) {
-      status.textContent = 'कृपया सवाल टाइप करें या साफ बोलें।';
+      status.textContent = this.currentLang === 'ml-IN' ? 'ദയവായി വ്യക്തമായി പറയുക!' : 'कृपया सवाल टाइप करें या साफ बोलें।';
       return;
     }
 
     try {
       const aiRes = await fetch(`/.netlify/functions/ai-query?query=${encodeURIComponent(query)}&lang=${this.currentLang}`);
-      if (!aiRes.ok) throw new Error('AI त्रुटि');
+      if (!aiRes.ok) throw new Error(`AI त्रुटि: ${aiRes.status}`);
       const response = await aiRes.json();
       this.showResponse(response);
       this.speakResponse(response);
 
       // Update relevant section
-      if (query.includes('मौसम') || query.includes('weather') || query.includes('കാലാവസ്ഥ')) {
+      if (query.toLowerCase().includes('मौसम') || query.toLowerCase().includes('weather') || query.toLowerCase().includes('കാലാവസ്ഥ')) {
         document.getElementById('weatherOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.includes('कीमत') || query.includes('price') || query.includes('വില')) {
+      } else if (query.toLowerCase().includes('कीमत') || query.toLowerCase().includes('price') || query.toLowerCase().includes('വില')) {
         document.getElementById('mandiOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.includes('योजना') || query.includes('scheme') || query.includes('പദ്ധതി')) {
+      } else if (query.toLowerCase().includes('योजना') || query.toLowerCase().includes('scheme') || query.toLowerCase().includes('പദ്ധതി')) {
         document.getElementById('schemesOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.includes('फसल') || query.includes('कीट') || query.includes('രോഗം')) {
+      } else if (query.toLowerCase().includes('फसल') || query.toLowerCase().includes('कीट') || query.toLowerCase().includes('रोग') || query.toLowerCase().includes('രോഗം')) {
         document.getElementById('pestOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.includes('मिट्टी') || query.includes('soil') || query.includes('മണ്ണ്')) {
+      } else if (query.toLowerCase().includes('मिट्टी') || query.toLowerCase().includes('soil') || query.toLowerCase().includes('മണ്ണ്')) {
         document.getElementById('soilOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
       }
     } catch (err) {
       console.error('AI query error:', err);
-      const fallback = this.currentLang === 'ml-IN' ? 'AI ഉത്തരം ലഭ്യമല്ല। വീണ്ടും ശ്രമിക്കുക!' : 'AI जवाब उपलब्ध नहीं। दोबारा कोशिश करें!';
+      const fallback = this.currentLang === 'ml-IN' 
+        ? 'AI ഉത്തരം ലഭ്യമല്ല। ഉദാ: തക്കാളി ₹26/kg (പാലക്കാട്), കൊച്ചി 26°C, മഴ। വീണ്ടും ചോദിക്കുക!'
+        : 'AI जवाब उपलब्ध नहीं। उदाहरण: टमाटर ₹26/kg (पालक्काड), कोच्चि 26°C, बारिश। दोबारा पूछें!';
       this.showResponse({ solution: fallback });
     }
   }
