@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ml">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KisanVaani - Kerala Farmer App</title>
+    <title>KisanVaani - किसान सहायक ऐप</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;600;800&display=swap" rel="stylesheet">
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
@@ -18,7 +18,7 @@
     <div id="splash" class="splash">
         <div class="splash-content">
             <div class="splash-icon">🌾</div>
-            <h2>KisanVaani കർഷക സഹായി</h2>
+            <h2 data-i18n="app.title">KisanVaani किसान सहायक</h2>
             <div class="splash-loader"></div>
         </div>
     </div>
@@ -26,49 +26,49 @@
     <!-- Main App Content -->
     <div class="container" id="appContent" style="display: none;">
         <header class="header">
-            <h1 class="title">🌾 KisanVaani</h1>
-            <p class="subtitle" id="greeting">നമസ്കാരം കർഷക സുഹൃത്തേ!</p>
+            <h1 class="title">🌾 <span data-i18n="app.name">KisanVaani</span></h1>
+            <p class="subtitle" id="greeting" data-i18n="greetings.welcome">नमस्कार किसान मित्र!</p>
         </header>
 
         <div class="language-selector">
             <select id="langSelect">
+                <option value="hi-IN" selected>हिन्दी</option>
                 <option value="ml-IN">മലയാളം</option>
-                <option value="hi-IN">हिन्दी</option>
                 <option value="en-IN">English</option>
             </select>
         </div>
 
         <!-- Daily Tip -->
         <section class="tip-card">
-            <h3>💡 ഇന്നത്തെ ടിപ്പ്</h3>
-            <p id="dailyTip">മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.</p>
+            <h3 data-i18n="tip.title">💡 आज की सलाह</h3>
+            <p id="dailyTip" data-i18n="tip.content">बारिश के मौसम में धान की सिंचाई 5-7 दिन में करें।</p>
         </section>
 
         <!-- Voice Input Section -->
         <section class="voice-card" id="voice-card">
-            <h2>🎤 ശബ്ദത്തിലൂടെ ചോദിക്കു!</h2>
-            <p>ഫസൽ, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.</p>
+            <h2 data-i18n="voice.title">🎤 आवाज़ से पूछें!</h2>
+            <p data-i18n="voice.description">फसल, मौसम, दाम, योजना - बोलें या टाइप करें।</p>
 
             <div class="mic-container">
                 <button id="micBtn" class="mic-btn" disabled>🎤</button>
             </div>
 
-            <div class="status" id="status">Microphone checking...</div>
+            <div class="status" id="status" data-i18n="mic.checking">माइक्रोफ़ोन जाँच रहे हैं...</div>
 
             <div class="input-group">
-                <input type="text" id="textInput" class="text-input" placeholder="ഇവിടെ ടൈപ്പ് ചെയ്യൂ...">
-                <button id="sendBtn" class="send-btn">അയയ്ക്കുക</button>
+                <input type="text" id="textInput" class="text-input" data-i18n-placeholder="input.placeholder">
+                <button id="sendBtn" class="send-btn" data-i18n="buttons.send">भेजें</button>
             </div>
         </section>
 
         <!-- Photo Upload Section -->
         <section class="photo-card section-card" id="photoSection">
-            <h2>📷 ഫസൽ ഫോട്ടോ അപ്‌ലോഡ്</h2>
-            <p>നിങ്ങളുടെ ഫസലിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്ത് പ്രശ്നം കണ്ടെത്തുക</p>
+            <h2 data-i18n="photo.title">📷 फसल फोटो अपलोड</h2>
+            <p data-i18n="photo.description">अपनी फसल की फोटो अपलोड करें और समस्या पता करें</p>
 
             <div class="photo-upload-container">
                 <input type="file" id="photoInput" accept="image/*" class="photo-input">
-                <button id="photoSubmitBtn" class="photo-submit-btn">ഫോട്ടോ വിശകലനം ചെയ്യുക</button>
+                <button id="photoSubmitBtn" class="photo-submit-btn" data-i18n="photo.submit">फोटो का विश्लेषण करें</button>
             </div>
 
             <div id="photoStatus" class="photo-status"></div>
@@ -77,40 +77,40 @@
 
         <!-- Weather Section -->
         <section class="section-card hidden" id="weatherSection">
-            <h2>🌤️ കാലാവസ്ഥ</h2>
-            <input type="text" id="cityInput" placeholder="നഗരം നൽകുക" value="Kochi">
-            <button id="weatherBtn">കാലാവസ്ഥ കാണുക</button>
+            <h2 data-i18n="weather.title">🌤️ मौसम</h2>
+            <input type="text" id="cityInput" data-i18n-placeholder="weather.placeholder" value="दिल्ली">
+            <button id="weatherBtn" data-i18n="weather.button">मौसम देखें</button>
             <div id="weatherResult"></div>
         </section>
 
         <!-- Mandi Section -->
         <section class="section-card hidden" id="mandiSection">
-            <h2>💰 മാർക്കറ്റ് വില</h2>
-            <input type="text" id="mandiSearch" placeholder="ഫസൽ പേര്" value="Tomato">
-            <button id="mandiBtn">വില അന്വേഷിക്കുക</button>
+            <h2 data-i18n="mandi.title">💰 बाजार भाव</h2>
+            <input type="text" id="mandiSearch" data-i18n-placeholder="mandi.placeholder" value="टमाटर">
+            <button id="mandiBtn" data-i18n="mandi.button">दाम जानें</button>
             <div id="mandiResult"></div>
         </section>
 
         <!-- Schemes Section -->
         <section class="section-card hidden" id="schemesSection">
-            <h2>🏛️ സർക്കാർ പദ്ധതികൾ</h2>
+            <h2 data-i18n="schemes.title">🏛️ सरकारी योजनाएं</h2>
             <div id="schemesList"></div>
         </section>
 
         <!-- Response Section -->
         <section class="response-section hidden" id="responseSection">
-            <h3>📝 ഉത്തരം</h3>
+            <h3 data-i18n="response.title">📝 जवाब</h3>
             <div id="responseContent"></div>
         </section>
     </div>
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <button class="nav-btn active" data-section="voice">🎤 ശബ്ദം</button>
-        <button class="nav-btn" data-section="photo">📷 ഫോട്ടോ</button>
-        <button class="nav-btn" data-section="weather">🌤️ കാലാവസ്ഥ</button>
-        <button class="nav-btn" data-section="mandi">💰 വില</button>
-        <button class="nav-btn" data-section="schemes">🏛️ പദ്ധതി</button>
+        <button class="nav-btn active" data-section="voice" data-i18n="nav.voice">🎤 आवाज़</button>
+        <button class="nav-btn" data-section="photo" data-i18n="nav.photo">📷 फोटो</button>
+        <button class="nav-btn" data-section="weather" data-i18n="nav.weather">🌤️ मौसम</button>
+        <button class="nav-btn" data-section="mandi" data-i18n="nav.mandi">💰 दाम</button>
+        <button class="nav-btn" data-section="schemes" data-i18n="nav.schemes">🏛️ योजना</button>
     </nav>
 
     <script src="app.js"></script>
