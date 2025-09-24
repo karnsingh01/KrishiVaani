@@ -1,118 +1,35 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KisanVaani - किसान सहायक ऐप</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;600;800&display=swap" rel="stylesheet">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
-</head>
-<body>
-    <!-- Splash Screen -->
-    <div id="splash" class="splash">
-        <div class="splash-content">
-            <div class="splash-icon">🌾</div>
-            <h2 data-i18n="app.title">KisanVaani किसान सहायक</h2>
-            <div class="splash-loader"></div>
-        </div>
-    </div>
+<!-- Existing splash/header... -->
 
-    <!-- Main App Content -->
-    <div class="container" id="appContent" style="display: none;">
-        <header class="header">
-            <h1 class="title">🌾 <span data-i18n="app.name">KisanVaani</span></h1>
-            <p class="subtitle" id="greeting" data-i18n="greetings.welcome">नमस्कार किसान मित्र!</p>
-        </header>
+<!-- Voice Card (add data-i18n to buttons/titles) -->
+<div class="voice-card" id="voice-card">
+  <h2 data-i18n="voicePrompt" class="voice-prompt">सब कुछ पूछें – आवाज में!</h2>
+  <!-- Existing mic/input... -->
+  <button id="sendBtn" data-i18n="sendBtn" class="send-btn">भेजें</button>
+</div>
 
-        <div class="language-selector">
-            <select id="langSelect">
-                <option value="hi-IN" selected>हिन्दी</option>
-                <option value="ml-IN">മലയാളം</option>
-                <option value="en-IN">English</option>
-            </select>
-        </div>
+<!-- New: Crop Photo Section -->
+<div class="section-card hidden" id="cropSection">
+  <h2 data-i18n="cropNav">📸 फसल फोटो लें</h2>
+  <p>अपनी फसल की फोटो खींचें और बीमारी का पता लगाएं।</p>
+  <video id="cropVideo" autoplay style="width:100%; border-radius:1rem;"></video>
+  <button id="captureBtn" class="send-btn">फोटो लें</button>
+  <canvas id="cropCanvas" style="display:none;"></canvas>
+  <img id="cropPhoto" style="max-width:100%; border-radius:1rem; display:none;" />
+  <div id="cropResponse" class="response-section"></div>
+</div>
 
-        <!-- Daily Tip -->
-        <section class="tip-card">
-            <h3 data-i18n="tip.title">💡 आज की सलाह</h3>
-            <p id="dailyTip" data-i18n="tip.content">बारिश के मौसम में धान की सिंचाई 5-7 दिन में करें।</p>
-        </section>
+<!-- Bottom Nav: Add Crop Button -->
+<div class="bottom-nav">
+  <button class="nav-btn active" data-section="home" data-i18n="homeNav">🏠</button>
+  <button class="nav-btn" data-section="weather" data-i18n="weatherNav">☀️</button>
+  <button class="nav-btn" data-section="market" data-i18n="marketNav">🛒</button>
+  <button class="nav-btn" data-section="schemes" data-i18n="schemesNav">🏛️</button>
+  <button class="nav-btn" data-section="crop" data-i18n="cropNav">📸</button> <!-- New -->
+</div>
 
-        <!-- Voice Input Section -->
-        <section class="voice-card" id="voice-card">
-            <h2 data-i18n="voice.title">🎤 आवाज़ से पूछें!</h2>
-            <p data-i18n="voice.description">फसल, मौसम, दाम, योजना - बोलें या टाइप करें।</p>
-
-            <div class="mic-container">
-                <button id="micBtn" class="mic-btn" disabled>🎤</button>
-            </div>
-
-            <div class="status" id="status" data-i18n="mic.checking">माइक्रोफ़ोन जाँच रहे हैं...</div>
-
-            <div class="input-group">
-                <input type="text" id="textInput" class="text-input" data-i18n-placeholder="input.placeholder">
-                <button id="sendBtn" class="send-btn" data-i18n="buttons.send">भेजें</button>
-            </div>
-        </section>
-
-        <!-- Photo Upload Section -->
-        <section class="photo-card section-card" id="photoSection">
-            <h2 data-i18n="photo.title">📷 फसल फोटो अपलोड</h2>
-            <p data-i18n="photo.description">अपनी फसल की फोटो अपलोड करें और समस्या पता करें</p>
-
-            <div class="photo-upload-container">
-                <input type="file" id="photoInput" accept="image/*" class="photo-input">
-                <button id="photoSubmitBtn" class="photo-submit-btn" data-i18n="photo.submit">फोटो का विश्लेषण करें</button>
-            </div>
-
-            <div id="photoStatus" class="photo-status"></div>
-            <div id="photoPreview" class="photo-preview"></div>
-        </section>
-
-        <!-- Weather Section -->
-        <section class="section-card hidden" id="weatherSection">
-            <h2 data-i18n="weather.title">🌤️ मौसम</h2>
-            <input type="text" id="cityInput" data-i18n-placeholder="weather.placeholder" value="दिल्ली">
-            <button id="weatherBtn" data-i18n="weather.button">मौसम देखें</button>
-            <div id="weatherResult"></div>
-        </section>
-
-        <!-- Mandi Section -->
-        <section class="section-card hidden" id="mandiSection">
-            <h2 data-i18n="mandi.title">💰 बाजार भाव</h2>
-            <input type="text" id="mandiSearch" data-i18n-placeholder="mandi.placeholder" value="टमाटर">
-            <button id="mandiBtn" data-i18n="mandi.button">दाम जानें</button>
-            <div id="mandiResult"></div>
-        </section>
-
-        <!-- Schemes Section -->
-        <section class="section-card hidden" id="schemesSection">
-            <h2 data-i18n="schemes.title">🏛️ सरकारी योजनाएं</h2>
-            <div id="schemesList"></div>
-        </section>
-
-        <!-- Response Section -->
-        <section class="response-section hidden" id="responseSection">
-            <h3 data-i18n="response.title">📝 जवाब</h3>
-            <div id="responseContent"></div>
-        </section>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <button class="nav-btn active" data-section="voice" data-i18n="nav.voice">🎤 आवाज़</button>
-        <button class="nav-btn" data-section="photo" data-i18n="nav.photo">📷 फोटो</button>
-        <button class="nav-btn" data-section="weather" data-i18n="nav.weather">🌤️ मौसम</button>
-        <button class="nav-btn" data-section="mandi" data-i18n="nav.mandi">💰 दाम</button>
-        <button class="nav-btn" data-section="schemes" data-i18n="nav.schemes">🏛️ योजना</button>
-    </nav>
-
-    <script src="app.js"></script>
-</body>
-</html>
+<!-- Language Selector: Ensure options have values like value="hi-IN" -->
+<select id="langSelect">
+  <option value="hi-IN" selected>हिंदी</option>
+  <option value="ml-IN">മലയാളം</option>
+  <option value="en-US">English</option>
+</select>
