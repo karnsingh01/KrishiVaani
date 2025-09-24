@@ -1,43 +1,44 @@
 const fetch = require('node-fetch');
 
-exports.handler = async (event) => {
-  const { query, lang } = event.queryStringParameters;
-
-  if (!query) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Query parameter is required' }),
-    };
-  }
-
+exports.handler = async (event, context) => {
   try {
-    const apiKey = process.env.XAI_API_KEY;
-    if (!apiKey) throw new Error('XAI_API_KEY not set');
+    const { query, lang = 'hi-IN' } = event.queryStringParameters || {};
+    const apiKey = process.env.GOOGLE_API_KEY; // Set in Netlify
+    if (!apiKey) throw new Error('Google API key missing.');
 
-    const response = await fetch('https://api.x.ai/v1/grok', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query,
-        lang,
-      }),
+        contents: [{
+          parts: [{
+            text: `${query} (Respond in ${lang === 'hi-IN' ? 'Hindi' : lang === 'ml-IN' ? 'Malayalam' : 'English'} for Kerala farmers: weather, prices, crop advice).`
+          }]
+        }]
+      })
     });
 
-    if (!response.ok) throw new Error(`Grok API error: ${response.status}`);
+    if (!response.ok) throw new Error(`Google API error: ${response.status}`);
     const data = await response.json();
+    const solution = data.candidates[0]?.content?.parts[0]?.text || 'No response from AI.';
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ solution: data.answer || 'AI जवाब उपलब्ध नहीं।' }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ solution, lang })
     };
   } catch (error) {
-    console.error('Error:', error);
+    console.error('AI Query error:', error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error: ' + error.message }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({
+        solution: lang === 'hi-IN'
+          ? 'AI उत्तर उपलब्ध नहीं। फॉलबैक: मिट्टी की जांच करें।'
+          : lang === 'ml-IN'
+          ? 'AI ഉത്തരം ലഭ്യമല്ല. ഫോൾബാക്ക്: മണ്ണ് പരിശോധിക്കുക.'
+          : 'AI response unavailable. Fallback: Test soil.'
+      })
     };
   }
 };
