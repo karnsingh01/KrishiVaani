@@ -1,239 +1,464 @@
 class KisanVaaniApp {
-  constructor() {
-    this.recognition = null;
-    this.synthesis = window.speechSynthesis;
-    this.currentLang = 'hi-IN';
-    this.commodities = [
-      { name: 'Tomato', hindi: 'टमाटर', malayalam: 'തക്കാളി' },
-      { name: 'Onion', hindi: 'प्याज', malayalam: 'സവോള' },
-      { name: 'Banana', hindi: 'केला', malayalam: 'വാഴപ്പഴം' },
-      { name: 'Mango', hindi: 'आम', malayalam: 'മാമ്പഴം' },
-      { name: 'Potato', hindi: 'आलू', malayalam: 'ഉരുളക്കിഴങ്ങ്' },
-      { name: 'Brinjal', hindi: 'बैंगन', malayalam: 'വഴുതന' },
-      { name: 'Cabbage', hindi: 'पत्तागोभी', malayalam: 'മുട്ടക്കോസ്' },
-    ];
-    this.initApp();
-  }
+    constructor() {
+        this.recognition = null;
+        this.synthesis = window.speechSynthesis;
+        this.currentLang = 'ml-IN';
+        this.isListening = false;
 
-  initApp() {
-    setTimeout(() => {
-      document.getElementById('splash').style.display = 'none';
-      document.getElementById('appContent').style.display = 'block';
-    }, 2000);
+        // Enhanced agricultural data with more problems and fertilizer recommendations
+        this.agriculturalData = {
+            cropProblems: {
+                'ഇലകൾ മഞ്ഞ': { 
+                    diagnosis: 'നൈട്രജൻ കുറവ്', 
+                    solution: 'യൂറിയ 25kg/ഏക്കർ തളിക്കുക. മഴയ്ക്ക് മുമ്പ് പ്രയോഗിക്കുക.',
+                    fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്']
+                },
+                'yellow leaves': { 
+                    diagnosis: 'Nitrogen deficiency', 
+                    solution: 'Apply Urea 25kg/acre before rain. Also use organic compost.',
+                    fertilizers: ['Urea', 'Ammonium Sulfate', 'Organic Compost']
+                },
+                'ഇലകൾ വാടി': {
+                    diagnosis: 'ജല കുറവ് അല്ലെങ്കിൽ വേരുചീയൽ',
+                    solution: 'ജലസേചനം പരിശോധിക്കുക. കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക.',
+                    fertilizers: ['കാർബെൻഡാസിം', 'NPK 19:19:19']
+                },
+                'brown spots': {
+                    diagnosis: 'Fungal infection',
+                    solution: 'Use Carbendazim spray. Improve air circulation.',
+                    fertilizers: ['Carbendazim', 'Copper Sulfate', 'Neem Oil']
+                }
+            }
+        };
 
-    const greetings = ['नमस्ते, कोच्चि के किसान!', 'हाय, पालक्काड किसान!', 'नमस्ते, त्रिशूर!'];
-    document.getElementById('greeting').textContent = greetings[Math.floor(Math.random() * greetings.length)];
-    const tips = ['मॉनसून में धान की सिंचाई 5-7 दिन में करें।', 'नारियल में बड रॉट के लिए बोर्डो स्प्रे करें।', 'केले की फसल में पानी का स्तर चेक करें।'];
-    document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
+        this.schemes = [
+            { name: "PM-KISAN", desc: "₹6000/വർഷം", link: "https://pmkisan.gov.in/" },
+            { name: "Kudumbashree", desc: "കർഷക വായ്പകൾ", link: "https://www.kudumbashree.org/" },
+            { name: "ATMA", desc: "കാർഷിക വിപുലീകരണം", link: "#" }
+        ];
 
-    this.checkMic();
-    this.setupEventListeners();
-    this.populateCommodities();
-  }
-
-  async checkMic() {
-    const micBtn = document.getElementById('micBtn');
-    const status = document.getElementById('status');
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      status.textContent = 'HTTPS की ज़रूरत – Netlify पर डिप्लॉय करें।';
-      return;
+        this.initApp();
     }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-      micBtn.disabled = false;
-      status.textContent = 'AI माइक तैयार – बोलें!';
-    } catch (err) {
-      console.error('Mic error:', err);
-      status.textContent = 'माइक परमिशन दें। AI टेक्स्ट से जवाब देगा।';
-      micBtn.disabled = false;
+    initApp() {
+        // Show splash screen for 3 seconds
+        setTimeout(() => {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+        }, 3000);
+
+        // Set random greeting
+        const greetings = ['നമസ്കാരം കർഷക സുഹൃത്തേ!', 'ഹലോ കൊച്ചി കർഷകേ!', 'വയനാട് കർഷകാ, സ്വാഗതം!'];
+        document.getElementById('greeting').textContent = greetings[Math.floor(Math.random() * greetings.length)];
+
+        // Set random daily tip
+        const tips = [
+            'മഴക്കാലത്ത് നാളികേരം ബഡ് റോട്ട് പരിശോധിക്കുക.',
+            'നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.',
+            'മണ്ണിന്റെ pH 6.5-7.5 വരെ നിലനിർത്തുക.',
+            'Use organic fertilizers for better soil health.'
+        ];
+        document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
+
+        this.checkSystemRequirements();
+        this.setupEventListeners();
+        this.populateSchemes();
     }
-  }
 
-  setupEventListeners() {
-    const micBtn = document.getElementById('micBtn');
-    const sendBtn = document.getElementById('sendBtn');
-    const textInput = document.getElementById('textInput');
-    const langSelect = document.getElementById('langSelect');
-    const weatherBtn = document.getElementById('weatherBtn');
-    const mandiBtn = document.getElementById('mandiBtn');
-    const schemesBtn = document.getElementById('schemesBtn');
-    const pestBtn = document.getElementById('pestBtn');
-    const soilBtn = document.getElementById('soilBtn');
+    checkSystemRequirements() {
+        // Check if speech recognition is supported
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById('micBtn');
+        const status = document.getElementById('status');
 
-    micBtn.addEventListener('click', () => this.startVoiceInput());
-    sendBtn.addEventListener('click', () => this.processTextInput());
-    textInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.processTextInput(); });
-
-    langSelect.addEventListener('change', (e) => {
-      this.currentLang = e.target.value;
-      document.getElementById('status').textContent = `भाषा बदली: ${e.target.options[e.target.selectedIndex].text}`;
-      this.populateCommodities();
-    });
-
-    weatherBtn.addEventListener('click', () => {
-      const city = document.getElementById('cityInput').value || 'Kochi';
-      this.processQuery(`मौसम ${city} में, 18 Sep 2025`);
-      document.getElementById('weatherOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
-    });
-
-    mandiBtn.addEventListener('click', () => {
-      const commodity = document.getElementById('commoditySelect').value || 'Tomato';
-      const district = document.getElementById('mandiSearch').value || 'Palakkad';
-      this.processQuery(`${commodity} की कीमत ${district} में, 18 Sep 2025`);
-      document.getElementById('mandiOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
-    });
-
-    schemesBtn.addEventListener('click', () => {
-      const scheme = document.getElementById('schemeInput').value || 'PM-KISAN';
-      this.processQuery(`${scheme} योजना की जानकारी, केरल के लिए`);
-      document.getElementById('schemesOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
-    });
-
-    pestBtn.addEventListener('click', () => {
-      const issue = document.getElementById('pestInput').value || 'पत्तियां पीली';
-      this.processQuery(`फसल समस्या: ${issue}, समाधान बताएँ`);
-      document.getElementById('pestOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
-    });
-
-    soilBtn.addEventListener('click', () => {
-      const soil = document.getElementById('soilInput').value || 'लेटराइट मिट्टी धान';
-      this.processQuery(`मिट्टी: ${soil}, उर्वरक सलाह`);
-      document.getElementById('soilOutput').innerHTML = '<div class="solution">AI जवाब लोड हो रहा है...</div>';
-    });
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelector('.nav-btn.active').classList.remove('active');
-        e.target.classList.add('active');
-        document.querySelectorAll('.section-card, .voice-card').forEach(sec => sec.classList.add('hidden'));
-        const sectionId = e.target.dataset.section === 'home' ? 'voice-card' : e.target.dataset.section + 'Section';
-        document.getElementById(sectionId).classList.remove('hidden');
-      });
-    });
-  }
-
-  async startVoiceInput() {
-    const status = document.getElementById('status');
-    const micBtn = document.getElementById('micBtn');
-    status.textContent = 'AI सुन रहा है...';
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      this.recognition = new SpeechRecognition();
-      this.recognition.lang = this.currentLang;
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
-
-      this.recognition.onstart = () => {
-        status.textContent = 'AI प्रोसेस कर रहा है...';
-        micBtn.classList.add('listening');
-      };
-
-      this.recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        status.textContent = `AI ने सुना: ${transcript}`;
-        this.processQuery(transcript);
-      };
-
-      this.recognition.onerror = (event) => {
-        console.error('Speech error:', event.error);
-        let errorMsg = 'माइक त्रुटि: ';
-        switch (event.error) {
-          case 'not-allowed': errorMsg += 'परमिशन दें।'; break;
-          case 'no-speech': errorMsg += 'कुछ नहीं सुना।'; break;
-          default: errorMsg += 'दोबारा कोशिश करें।';
+        if (SpeechRecognition) {
+            micBtn.disabled = false;
+            status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+            status.style.color = 'green';
+        } else {
+            status.textContent = 'ശബ്ദ പിന്തുണ ലഭ്യമല്ല.';
+            status.style.color = 'red';
         }
-        status.textContent = errorMsg + ' AI टेक्स्ट से जवाब देगा।';
-        this.processQuery('');
-      };
 
-      this.recognition.onend = () => {
+        // Check HTTPS
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            status.textContent = 'HTTPS ആവശ്യമാണ് മൈക്രോഫോൺ പ്രവർത്തനത്തിന്.';
+            status.style.color = 'orange';
+        }
+    }
+
+    setupEventListeners() {
+        const micBtn = document.getElementById('micBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const textInput = document.getElementById('textInput');
+        const langSelect = document.getElementById('langSelect');
+        const weatherBtn = document.getElementById('weatherBtn');
+        const mandiBtn = document.getElementById('mandiBtn');
+        const photoInput = document.getElementById('photoInput');
+        const photoSubmitBtn = document.getElementById('photoSubmitBtn');
+
+        // Voice input
+        micBtn.addEventListener('click', () => this.startVoiceInput());
+
+        // Text input
+        sendBtn.addEventListener('click', () => this.processTextInput());
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.processTextInput();
+        });
+
+        // Language selection
+        langSelect.addEventListener('change', (e) => {
+            this.currentLang = e.target.value;
+        });
+
+        // Weather and Mandi
+        weatherBtn.addEventListener('click', () => this.fetchWeather(document.getElementById('cityInput').value || 'Kochi'));
+        mandiBtn.addEventListener('click', () => this.fetchMandiPrices(document.getElementById('mandiSearch').value || 'Tomato'));
+
+        // Photo upload functionality
+        photoInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                this.previewImage(e.target.files[0]);
+            }
+        });
+
+        photoSubmitBtn.addEventListener('click', () => this.analyzePhoto());
+
+        // Bottom navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelector('.nav-btn.active')?.classList.remove('active');
+                e.target.classList.add('active');
+
+                // Hide all sections
+                document.querySelectorAll('.section-card, .voice-card').forEach(sec => sec.classList.add('hidden'));
+
+                // Show selected section
+                const section = e.target.dataset.section;
+                if (section === 'voice') {
+                    document.getElementById('voice-card').classList.remove('hidden');
+                } else {
+                    document.getElementById(section + 'Section').classList.remove('hidden');
+                }
+            });
+        });
+    }
+
+    async startVoiceInput() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById('micBtn');
+        const status = document.getElementById('status');
+
+        if (!SpeechRecognition) {
+            this.showError('ശബ്ദ പിന്തുണ ഈ ബ്രൗസറിൽ ലഭ്യമല്ല.');
+            return;
+        }
+
+        if (this.isListening) {
+            this.stopListening();
+            return;
+        }
+
+        try {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = this.currentLang;
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+
+            this.recognition.onstart = () => {
+                this.isListening = true;
+                micBtn.classList.add('listening');
+                micBtn.textContent = '🛑';
+                status.textContent = 'കേൾക്കുന്നു... സംസാരിക്കുക!';
+                status.style.color = 'blue';
+            };
+
+            this.recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('textInput').value = transcript;
+                status.textContent = `കേട്ടു: "${transcript}"`;
+                this.processQuery(transcript);
+                this.stopListening();
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                let errorMessage = 'ശബ്ദ പിശക്: ';
+
+                switch(event.error) {
+                    case 'not-allowed':
+                        errorMessage += 'മൈക്രോഫോൺ അനുമതി നിഷേധിച്ചു. അനുമതി നൽകി വീണ്ടും ശ്രമിക്കുക.';
+                        break;
+                    case 'no-speech':
+                        errorMessage += 'ശബ്ദം കേട്ടില്ല. വീണ്ടും ശ്രമിക്കുക.';
+                        break;
+                    case 'network':
+                        errorMessage += 'നെറ്റ്‌വർക്ക് പിശക്.';
+                        break;
+                    default:
+                        errorMessage += event.error;
+                }
+
+                this.showError(errorMessage);
+                this.stopListening();
+            };
+
+            this.recognition.onend = () => {
+                this.stopListening();
+            };
+
+            this.recognition.start();
+
+        } catch (error) {
+            console.error('Error starting speech recognition:', error);
+            this.showError('മൈക്രോഫോൺ ആരംഭിക്കാൻ കഴിയുന്നില്ല.');
+        }
+    }
+
+    stopListening() {
+        if (this.recognition) {
+            this.recognition.stop();
+        }
+
+        const micBtn = document.getElementById('micBtn');
+        const status = document.getElementById('status');
+
+        this.isListening = false;
         micBtn.classList.remove('listening');
-        status.textContent = 'AI तैयार – दोबारा बोलें!';
-      };
-
-      try {
-        this.recognition.start();
-      } catch (err) {
-        status.textContent = 'माइक शुरू नहीं हुआ – टेक्स्ट यूज़ करें।';
-        this.processQuery('');
-      }
-    } else {
-      status.textContent = 'माइक सपोर्ट नहीं – AI टेक्स्ट से जवाब देगा।';
-      this.processQuery('');
-    }
-  }
-
-  async processQuery(query) {
-    const status = document.getElementById('status');
-    if (!query) {
-      status.textContent = this.currentLang === 'ml-IN' ? 'ദയവായി വ്യക്തമായി പറയുക!' : 'कृपया सवाल टाइप करें या साफ बोलें।';
-      return;
+        micBtn.textContent = '🎤';
+        status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+        status.style.color = 'green';
     }
 
-    try {
-      const aiRes = await fetch(`/.netlify/functions/ai-query?query=${encodeURIComponent(query)}&lang=${this.currentLang}`);
-      if (!aiRes.ok) throw new Error(`AI त्रुटि: ${aiRes.status}`);
-      const response = await aiRes.json();
-      this.showResponse(response);
-      this.speakResponse(response);
+    processTextInput() {
+        const textInput = document.getElementById('textInput');
+        const query = textInput.value.trim();
 
-      // Update relevant section
-      if (query.toLowerCase().includes('मौसम') || query.toLowerCase().includes('weather') || query.toLowerCase().includes('കാലാവസ്ഥ')) {
-        document.getElementById('weatherOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.toLowerCase().includes('कीमत') || query.toLowerCase().includes('price') || query.toLowerCase().includes('വില')) {
-        document.getElementById('mandiOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.toLowerCase().includes('योजना') || query.toLowerCase().includes('scheme') || query.toLowerCase().includes('പദ്ധതി')) {
-        document.getElementById('schemesOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.toLowerCase().includes('फसल') || query.toLowerCase().includes('कीट') || query.toLowerCase().includes('रोग') || query.toLowerCase().includes('രോഗം')) {
-        document.getElementById('pestOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      } else if (query.toLowerCase().includes('मिट्टी') || query.toLowerCase().includes('soil') || query.toLowerCase().includes('മണ്ണ്')) {
-        document.getElementById('soilOutput').innerHTML = `<div class="solution">${response.solution}</div>`;
-      }
-    } catch (err) {
-      console.error('AI query error:', err);
-      const fallback = this.currentLang === 'ml-IN' 
-        ? 'AI ഉത്തരം ലഭ്യമല്ല। ഉദാ: തക്കാളി ₹26/kg (പാലക്കാട്), കൊച്ചി 26°C, മഴ। വീണ്ടും ചോദിക്കുക!'
-        : 'AI जवाब उपलब्ध नहीं। उदाहरण: टमाटर ₹26/kg (पालक्काड), कोच्चि 26°C, बारिश। दोबारा पूछें!';
-      this.showResponse({ solution: fallback });
+        if (query) {
+            this.processQuery(query);
+            textInput.value = '';
+        }
     }
-  }
 
-  showResponse(response) {
-    document.getElementById('responseContent').innerHTML = `<div class="solution"><strong>🔍 AI उत्तर:</strong> ${response.solution}</div>`;
-    document.getElementById('responseSection').classList.remove('hidden');
-  }
+    async processQuery(query) {
+        const lowerQuery = query.toLowerCase();
+        let response;
 
-  speakResponse(response) {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(response.solution);
-      utterance.lang = this.currentLang;
-      utterance.rate = 0.9;
-      this.synthesis.speak(utterance);
+        // Show loading
+        this.showLoading();
+
+        if (lowerQuery.includes('കാലാവസ്ഥ') || lowerQuery.includes('weather')) {
+            response = await this.fetchWeather('Kochi');
+        } else if (lowerQuery.includes('വില') || lowerQuery.includes('price') || lowerQuery.includes('മാർക്കറ്റ്')) {
+            response = await this.fetchMandiPrices('Tomato');
+        } else {
+            response = this.getAIResponse(lowerQuery);
+        }
+
+        this.showResponse(response);
+        this.speakResponse(response);
     }
-  }
 
-  populateCommodities() {
-    const select = document.getElementById('commoditySelect');
-    select.innerHTML = '';
-    const labelKey = this.currentLang === 'ml-IN' ? 'malayalam' : 'hindi';
-    this.commodities.forEach(commodity => {
-      const option = document.createElement('option');
-      option.value = commodity.name;
-      option.textContent = commodity[labelKey];
-      select.appendChild(option);
-    });
-  }
+    previewImage(file) {
+        const preview = document.getElementById('photoPreview');
+        const reader = new FileReader();
 
-  processTextInput() {
-    const query = document.getElementById('textInput').value.trim();
-    if (query) {
-      document.getElementById('textInput').value = '';
-      this.processQuery(query);
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Crop preview" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
+        };
+
+        reader.readAsDataURL(file);
+        document.getElementById('photoStatus').textContent = 'ഫോട്ടോ തയ്യാറായി!';
     }
-  }
+
+    async analyzePhoto() {
+        const photoInput = document.getElementById('photoInput');
+        const photoStatus = document.getElementById('photoStatus');
+
+        if (!photoInput.files[0]) {
+            photoStatus.textContent = 'ദയവായി ഒരു ഫോട്ടോ തിരഞ്ഞെടുക്കുക.';
+            photoStatus.style.color = 'red';
+            return;
+        }
+
+        photoStatus.textContent = 'ഫോട്ടോ വിശകലനം ചെയ്യുന്നു...';
+        photoStatus.style.color = 'blue';
+
+        // Simulate AI analysis (replace with actual AI service)
+        setTimeout(() => {
+            // Random diagnosis for demo
+            const problems = [
+                {
+                    diagnosis: 'ഇലകളിൽ മഞ്ഞനിറം കണ്ടെത്തി - നൈട്രജൻ കുറവ്',
+                    solution: 'യൂറിയ 25kg/ഏക്കർ എന്ന തോതിൽ പ്രയോഗിക്കുക. മഴയ്ക്ക് മുമ്പ് നൽകുക.',
+                    fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്', 'ജൈവ കമ്പോസ്റ്റ്']
+                },
+                {
+                    diagnosis: 'ഇലകളിൽ തവിട്ടുനിറ പാടുകൾ - ഫംഗൽ അണുബാധ',
+                    solution: 'കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക. വായു സഞ്ചാരം മെച്ചപ്പെടുത്തുക.',
+                    fertilizers: ['കാർബെൻഡാസിം', 'കോപ്പർ സൾഫേറ്റ്', 'വേപ്പെണ്ണ']
+                },
+                {
+                    diagnosis: 'ആരോഗ്യകരമായ സസ്യം - പ്രതിരോധ പരിചരണം ആവശ്യം',
+                    solution: 'NPK 19:19:19 പ്രയോഗിക്കുക. ജൈവ കമ്പോസ്റ്റ് ചേർക്കുക.',
+                    fertilizers: ['NPK 19:19:19', 'ജൈവ കമ്പോസ്റ്റ്', 'വേപ്പ് കേക്ക്']
+                }
+            ];
+
+            const randomProblem = problems[Math.floor(Math.random() * problems.length)];
+
+            const response = {
+                diagnosis: randomProblem.diagnosis,
+                solution: `${randomProblem.solution}\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: ${randomProblem.fertilizers.join(', ')}`,
+                fertilizers: randomProblem.fertilizers
+            };
+
+            this.showResponse(response);
+            this.speakResponse(response);
+
+            photoStatus.textContent = 'വിശകലനം പൂർത്തീകരിച്ചു!';
+            photoStatus.style.color = 'green';
+        }, 2000);
+    }
+
+    async fetchWeather(city) {
+        try {
+            // Mock weather data for demo
+            const weatherData = {
+                solution: `${city} കാലാവസ്ഥ: 28°C, മഴ സാധ്യത 70%. കാർഷിക പ്രവർത്തനങ്ങൾക്ക് അനുകൂലം.`
+            };
+            return weatherData;
+        } catch (err) {
+            return { 
+                solution: 'കാലാവസ്ഥ വിവരങ്ങൾ ലഭ്യമല്ല. പൊതുവേ 25-30°C, മഴ സാധ്യത.'
+            };
+        }
+    }
+
+    async fetchMandiPrices(commodity) {
+        try {
+            // Mock mandi prices for demo
+            const prices = {
+                'Tomato': '₹30/kg',
+                'Onion': '₹25/kg', 
+                'Rice': '₹45/kg',
+                'Coconut': '₹35/piece'
+            };
+
+            return {
+                solution: `${commodity} വില: ${prices[commodity] || '₹25/kg'} (പാലക്കാട് മണ്ടി). വിൽപ്പനയ്ക്ക് അനുകൂല സമയം.`
+            };
+        } catch (err) {
+            return { 
+                solution: 'മാർക്കറ്റ് വിലകൾ ലഭ്യമല്ല. ശരാശരി വില: ₹25-30/kg.'
+            };
+        }
+    }
+
+    getAIResponse(query) {
+        // Enhanced AI response with fertilizer recommendations
+        const lowerQuery = query.toLowerCase();
+
+        for (const [key, data] of Object.entries(this.agriculturalData.cropProblems)) {
+            if (lowerQuery.includes(key.toLowerCase()) || 
+                lowerQuery.includes(data.diagnosis.toLowerCase())) {
+                return {
+                    diagnosis: data.diagnosis,
+                    solution: `${data.solution}\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: ${data.fertilizers.join(', ')}`,
+                    fertilizers: data.fertilizers
+                };
+            }
+        }
+
+        // Default response with general advice
+        return { 
+            diagnosis: 'പൊതു ഉപദേശം', 
+            solution: 'മണ്ണ് പരിശോധന നടത്തുക. pH 6.5-7.5 നിലനിർത്തുക. ജൈവ കമ്പോസ്റ്റ് ഉപയോഗിക്കുക.\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: NPK 19:19:19, ജൈവ കമ്പോസ്റ്റ്',
+            fertilizers: ['NPK 19:19:19', 'ജൈവ കമ്പോസ്റ്റ്', 'വേപ്പ് കേക്ക്']
+        };
+    }
+
+    speakResponse(response) {
+        if (this.synthesis && response.solution) {
+            // Stop any ongoing speech
+            this.synthesis.cancel();
+
+            const text = response.solution.replace(/\n/g, ' ');
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = this.currentLang;
+            utterance.rate = 0.8;
+            utterance.volume = 1;
+
+            this.synthesis.speak(utterance);
+        }
+    }
+
+    showResponse(response) {
+        const responseSection = document.getElementById('responseSection');
+        const responseContent = document.getElementById('responseContent');
+
+        let html = '';
+
+        if (response.diagnosis) {
+            html += `<div class="diagnosis"><strong>🔍 രോഗനിർണ്ണയം:</strong> ${response.diagnosis}</div>`;
+        }
+
+        if (response.solution) {
+            html += `<div class="solution"><strong>💡 പരിഹാരം:</strong> ${response.solution.replace(/\n/g, '<br>')}</div>`;
+        }
+
+        if (response.fertilizers) {
+            html += `<div class="fertilizers"><strong>🧪 ശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ:</strong><ul>`;
+            response.fertilizers.forEach(fertilizer => {
+                html += `<li>${fertilizer}</li>`;
+            });
+            html += `</ul></div>`;
+        }
+
+        responseContent.innerHTML = html;
+        responseSection.classList.remove('hidden');
+
+        // Scroll to response
+        responseSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    showLoading() {
+        const responseSection = document.getElementById('responseSection');
+        const responseContent = document.getElementById('responseContent');
+
+        responseContent.innerHTML = '<div class="loading">⏳ ഉത്തരം തയ്യാറാക്കുന്നു...</div>';
+        responseSection.classList.remove('hidden');
+    }
+
+    showError(message) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.style.color = 'red';
+
+        // Clear error after 5 seconds
+        setTimeout(() => {
+            status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+            status.style.color = 'green';
+        }, 5000);
+    }
+
+    populateSchemes() {
+        const schemesList = document.getElementById('schemesList');
+
+        this.schemes.forEach(scheme => {
+            const div = document.createElement('div');
+            div.className = 'scheme-item';
+            div.innerHTML = `
+                <h4>${scheme.name}</h4>
+                <p>${scheme.desc}</p>
+                <a href="${scheme.link}" target="_blank">കൂടുതൽ അറിയുക</a>
+            `;
+            schemesList.appendChild(div);
+        });
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => new KisanVaaniApp());
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new KisanVaaniApp();
+});
