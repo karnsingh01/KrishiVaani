@@ -1,117 +1,117 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="ml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KisanVaani – भारतीय किसान ऐप</title>
+    <title>KisanVaani - Kerala Farmer App</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
-    <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
 </head>
 <body>
+    <!-- Splash Screen -->
     <div id="splash" class="splash">
         <div class="splash-content">
             <div class="splash-icon">🌾</div>
-            <h2>KisanVaani लोड हो रहा है...</h2>
+            <h2>KisanVaani കർഷക സഹായി</h2>
             <div class="splash-loader"></div>
         </div>
     </div>
 
-    <div class="container" id="appContent" style="display:none;">
+    <!-- Main App Content -->
+    <div class="container" id="appContent" style="display: none;">
         <header class="header">
-            <h1 class="title">🌿 KisanVaani</h1>
-            <p class="subtitle" id="greeting">नमस्ते! आज की सलाह: नारियल में बड रॉट चेक करें।</p>
+            <h1 class="title">🌾 KisanVaani</h1>
+            <p class="subtitle" id="greeting">നമസ്കാരം കർഷക സുഹൃത്തേ!</p>
         </header>
 
         <div class="language-selector">
             <select id="langSelect">
-                <option value="hi-IN" selected>हिंदी (Hindi)</option>
-                <option value="ml-IN">മലയാളം (Malayalam)</option>
-                <option value="ta-IN">தமிழ் (Tamil)</option>
-                <option value="te-IN">తెలుగు (Telugu)</option>
-                <option value="mr-IN">मराठी (Marathi)</option>
-                <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+                <option value="ml-IN">മലയാളം</option>
+                <option value="hi-IN">हिन्दी</option>
                 <option value="en-IN">English</option>
             </select>
         </div>
 
+        <!-- Daily Tip -->
         <section class="tip-card">
-            <h3>🌟 आज की सलाह</h3>
-            <p id="dailyTip">मॉनसून में धान की सिंचाई 5-7 दिन में करें।</p>
+            <h3>💡 ഇന്നത്തെ ടിപ്പ്</h3>
+            <p id="dailyTip">മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.</p>
         </section>
 
-        <section class="voice-card">
-            <h2>🎤 AI से पूछें – फसल, कीट, मिट्टी!</h2>
-            <p>बोलें या टाइप करें। AI तेज़ जवाब देगा।</p>
+        <!-- Voice Input Section -->
+        <section class="voice-card" id="voice-card">
+            <h2>🎤 ശബ്ദത്തിലൂടെ ചോദിക്കു!</h2>
+            <p>ഫസൽ, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.</p>
+
             <div class="mic-container">
-                <button id="micBtn" class="mic-btn" disabled>🎤 AI</button>
-                <div class="status" id="status">AI तैयार – बोलें!</div>
+                <button id="micBtn" class="mic-btn" disabled>🎤</button>
             </div>
+
+            <div class="status" id="status">Microphone checking...</div>
+
             <div class="input-group">
-                <input type="text" id="textInput" class="text-input" placeholder="उदा: केला कीमत पालक्काड">
-                <button id="sendBtn" class="send-btn">AI से पूछें</button>
+                <input type="text" id="textInput" class="text-input" placeholder="ഇവിടെ ടൈപ്പ് ചെയ്യൂ...">
+                <button id="sendBtn" class="send-btn">അയയ്ക്കുക</button>
             </div>
         </section>
 
-        <section id="responseSection" class="response-section hidden">
-            <h3>🤖 AI उत्तर:</h3>
+        <!-- Photo Upload Section -->
+        <section class="photo-card section-card" id="photoSection">
+            <h2>📷 ഫസൽ ഫോട്ടോ അപ്‌ലോഡ്</h2>
+            <p>നിങ്ങളുടെ ഫസലിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്ത് പ്രശ്നം കണ്ടെത്തുക</p>
+
+            <div class="photo-upload-container">
+                <input type="file" id="photoInput" accept="image/*" class="photo-input">
+                <button id="photoSubmitBtn" class="photo-submit-btn">ഫോട്ടോ വിശകലനം ചെയ്യുക</button>
+            </div>
+
+            <div id="photoStatus" class="photo-status"></div>
+            <div id="photoPreview" class="photo-preview"></div>
+        </section>
+
+        <!-- Weather Section -->
+        <section class="section-card hidden" id="weatherSection">
+            <h2>🌤️ കാലാവസ്ഥ</h2>
+            <input type="text" id="cityInput" placeholder="നഗരം നൽകുക" value="Kochi">
+            <button id="weatherBtn">കാലാവസ്ഥ കാണുക</button>
+            <div id="weatherResult"></div>
+        </section>
+
+        <!-- Mandi Section -->
+        <section class="section-card hidden" id="mandiSection">
+            <h2>💰 മാർക്കറ്റ് വില</h2>
+            <input type="text" id="mandiSearch" placeholder="ഫസൽ പേര്" value="Tomato">
+            <button id="mandiBtn">വില അന്വേഷിക്കുക</button>
+            <div id="mandiResult"></div>
+        </section>
+
+        <!-- Schemes Section -->
+        <section class="section-card hidden" id="schemesSection">
+            <h2>🏛️ സർക്കാർ പദ്ധതികൾ</h2>
+            <div id="schemesList"></div>
+        </section>
+
+        <!-- Response Section -->
+        <section class="response-section hidden" id="responseSection">
+            <h3>📝 ഉത്തരം</h3>
             <div id="responseContent"></div>
         </section>
-
-        <nav class="bottom-nav">
-            <button class="nav-btn active" data-section="home">🏠 होम</button>
-            <button class="nav-btn" data-section="weather">☀️ मौसम</button>
-            <button class="nav-btn" data-section="mandi">🛒 मंडी</button>
-            <button class="nav-btn" data-section="schemes">🏛️ योजनाएँ</button>
-            <button class="nav-btn" data-section="pest">🐞 कीट/रोग</button>
-            <button class="nav-btn" data-section="soil">🌱 मिट्टी</button>
-        </nav>
-
-        <section id="weatherSection" class="section-card hidden">
-            <h2>☀️ मौसम (OpenWeatherMap से)</h2>
-            <input type="text" id="cityInput" class="text-input" placeholder="शहर (उदा: कोच्चि)">
-            <button id="weatherBtn" class="send-btn">मौसम देखें</button>
-            <div id="weatherOutput" class="response-content"></div>
-        </section>
-
-        <section id="mandiSection" class="section-card hidden">
-            <h2>🛒 मंडी कीमतें (data.gov.in से)</h2>
-            <input type="text" id="mandiSearch" class="text-input" placeholder="सर्च: केला पालक्काड">
-            <select id="commoditySelect">
-                <option value="Tomato">टमाटर</option>
-                <option value="Onion">प्याज</option>
-                <option value="Banana">केला</option>
-                <option value="Mango">आम</option>
-                <option value="Potato">आलू</option>
-                <option value="Brinjal">बैंगन</option>
-                <option value="Cabbage">पत्तागोभी</option>
-            </select>
-            <button id="mandiBtn" class="send-btn">कीमत देखें</button>
-            <div id="mandiOutput" class="response-content"></div>
-        </section>
-
-        <section id="schemesSection" class="section-card hidden">
-            <h2>🏛️ योजनाएँ (सरकारी साइट्स से)</h2>
-            <input type="text" id="schemeInput" class="text-input" placeholder="योजना (उदा: PM-KISAN)">
-            <button id="schemesBtn" class="send-btn">डिटेल्स देखें</button>
-            <div id="schemesOutput" class="response-content"></div>
-        </section>
-
-        <section id="pestSection" class="section-card hidden">
-            <h2>🐞 कीट/रोग (AI से)</h2>
-            <input type="text" id="pestInput" class="text-input" placeholder="उदा: पत्तियां पीली">
-            <button id="pestBtn" class="send-btn">सलाह लें</button>
-            <div id="pestOutput" class="response-content"></div>
-        </section>
-
-        <section id="soilSection" class="section-card hidden">
-            <h2>🌱 मिट्टी (AI से)</h2>
-            <input type="text" id="soilInput" class="text-input" placeholder="उदा: लेटराइट मिट्टी धान">
-            <button id="soilBtn" class="send-btn">सलाह लें</button>
-            <div id="soilOutput" class="response-content"></div>
-        </section>
     </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" data-section="voice">🎤 ശബ്ദം</button>
+        <button class="nav-btn" data-section="photo">📷 ഫോട്ടോ</button>
+        <button class="nav-btn" data-section="weather">🌤️ കാലാവസ്ഥ</button>
+        <button class="nav-btn" data-section="mandi">💰 വില</button>
+        <button class="nav-btn" data-section="schemes">🏛️ പദ്ധതി</button>
+    </nav>
 
     <script src="app.js"></script>
 </body>
