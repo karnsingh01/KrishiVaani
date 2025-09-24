@@ -2,40 +2,254 @@ class KisanVaaniApp {
     constructor() {
         this.recognition = null;
         this.synthesis = window.speechSynthesis;
-        this.currentLang = 'ml-IN';
+        this.currentLang = 'hi-IN';
         this.isListening = false;
 
-        // Enhanced agricultural data with more problems and fertilizer recommendations
+        // Multilingual translations
+        this.translations = {
+            'hi-IN': {
+                'app.name': 'KisanVaani',
+                'app.title': 'KisanVaani किसान सहायक',
+                'greetings.welcome': 'नमस्कार किसान मित्र!',
+                'greetings.kochi': 'नमस्कार कृषक मित्र!',
+                'greetings.wayanad': 'वायनाड के किसान, स्वागत!',
+                'greetings.punjab': 'पंजाब के किसान भाई, नमस्कार!',
+                'tip.title': '💡 आज की सलाह',
+                'tip.content': 'बारिश के मौसम में धान की सिंचाई 5-7 दिन में करें।',
+                'tip.coconut': 'नारियल में बड रॉट की जांच करें।',
+                'tip.soil': 'मिट्टी का pH 6.5-7.5 बनाए रखें।',
+                'tip.organic': 'मिट्टी की सेहत के लिए जैविक खाद का उपयोग करें।',
+                'voice.title': '🎤 आवाज़ से पूछें!',
+                'voice.description': 'फसल, मौसम, दाम, योजना - बोलें या टाइप करें।',
+                'mic.checking': 'माइक्रोफ़ोन जाँच रहे हैं...',
+                'mic.ready': 'माइक्रोफ़ोन तैयार!',
+                'mic.listening': 'सुन रहे हैं... बोलिए!',
+                'mic.heard': 'सुना गया:',
+                'mic.denied': 'माइक्रोफ़ोन की अनुमति नहीं मिली। अनुमति दें और फिर कोशिश करें।',
+                'mic.nospeech': 'आवाज़ नहीं सुनी। फिर कोशिश करें।',
+                'mic.error': 'आवाज़ में त्रुटि:',
+                'input.placeholder': 'यहाँ टाइप करें...',
+                'buttons.send': 'भेजें',
+                'photo.title': '📷 फसल फोटो अपलोड',
+                'photo.description': 'अपनी फसल की फोटो अपलोड करें और समस्या पता करें',
+                'photo.submit': 'फोटो का विश्लेषण करें',
+                'photo.select': 'कृपया एक फोटो चुनें।',
+                'photo.analyzing': 'फोटो का विश्लेषण हो रहा है...',
+                'photo.ready': 'फोटो तैयार!',
+                'photo.complete': 'विश्लेषण पूरा!',
+                'weather.title': '🌤️ मौसम',
+                'weather.placeholder': 'शहर का नाम',
+                'weather.button': 'मौसम देखें',
+                'mandi.title': '💰 बाजार भाव',
+                'mandi.placeholder': 'फसल का नाम',
+                'mandi.button': 'दाम जानें',
+                'schemes.title': '🏛️ सरकारी योजनाएं',
+                'response.title': '📝 जवाब',
+                'response.loading': '⏳ जवाब तैयार हो रहा है...',
+                'nav.voice': '🎤 आवाज़',
+                'nav.photo': '📷 फोटो',
+                'nav.weather': '🌤️ मौसम',
+                'nav.mandi': '💰 दाम',
+                'nav.schemes': '🏛️ योजना',
+                'diagnosis': '🔍 रोग निदान:',
+                'solution': '💡 समाधान:',
+                'fertilizers': '🧪 सुझाई गई खाद:',
+                'weather.info': 'मौसम: 28°C, बारिश की संभावना 70%। खेती के काम के लिए अनुकूल।',
+                'price.info': 'भाव: ₹30/किलो (दिल्ली मंडी)। बिक्री के लिए अच्छा समय।',
+                'general.advice': 'मिट्टी की जांच कराएं। pH 6.5-7.5 रखें। जैविक खाद का इस्तेमाल करें।'
+            },
+            'ml-IN': {
+                'app.name': 'KisanVaani',
+                'app.title': 'KisanVaani കർഷക സഹായി',
+                'greetings.welcome': 'നമസ്കാരം കർഷക സുഹൃത്തേ!',
+                'greetings.kochi': 'നമസ്കാരം, കൊച്ചി കർഷകേ!',
+                'greetings.wayanad': 'വയനാട് കർഷകാ, സ്വാഗതം!',
+                'greetings.punjab': 'പഞ്ചാബ് കർഷകാ, നമസ്കാരം!',
+                'tip.title': '💡 ഇന്നത്തെ ടിപ്പ്',
+                'tip.content': 'മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.',
+                'tip.coconut': 'നാളികേരം ബഡ് റോട്ട് പരിശോധിക്കുക.',
+                'tip.soil': 'മണ്ണിന്റെ pH 6.5-7.5 വരെ നിലനിർത്തുക.',
+                'tip.organic': 'മണ്ണിന്റെ ആരോഗ്യത്തിനായി ജൈവ വളം ഉപയോഗിക്കുക.',
+                'voice.title': '🎤 ശബ്ദത്തിലൂടെ ചോദിക്കു!',
+                'voice.description': 'ഫസൽ, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.',
+                'mic.checking': 'മൈക്രോഫോൺ പരിശോധിക്കുന്നു...',
+                'mic.ready': 'മൈക്രോഫോൺ തയ്യാർ!',
+                'mic.listening': 'കേൾക്കുന്നു... സംസാരിക്കുക!',
+                'mic.heard': 'കേട്ടു:',
+                'mic.denied': 'മൈക്രോഫോൺ അനുമതി നിഷേധിച്ചു. അനുമതി നൽകി വീണ്ടും ശ്രമിക്കുക.',
+                'mic.nospeech': 'ശബ്ദം കേട്ടില്ല. വീണ്ടും ശ്രമിക്കുക.',
+                'mic.error': 'ശബ്ദ പിശക്:',
+                'input.placeholder': 'ഇവിടെ ടൈപ്പ് ചെയ്യൂ...',
+                'buttons.send': 'അയയ്ക്കുക',
+                'photo.title': '📷 ഫസൽ ഫോട്ടോ അപ്‌ലോഡ്',
+                'photo.description': 'നിങ്ങളുടെ ഫസലിന്റെ ഫോട്ടോ അപ്‌ലോഡ് ചെയ്ത് പ്രശ്നം കണ്ടെത്തുക',
+                'photo.submit': 'ഫോട്ടോ വിശകലനം ചെയ്യുക',
+                'photo.select': 'ദയവായി ഒരു ഫോട്ടോ തിരഞ്ഞെടുക്കുക.',
+                'photo.analyzing': 'ഫോട്ടോ വിശകലനം ചെയ്യുന്നു...',
+                'photo.ready': 'ഫോട്ടോ തയ്യാറായി!',
+                'photo.complete': 'വിശകലനം പൂർത്തീകരിച്ചു!',
+                'weather.title': '🌤️ കാലാവസ്ഥ',
+                'weather.placeholder': 'നഗരം നൽകുക',
+                'weather.button': 'കാലാവസ്ഥ കാണുക',
+                'mandi.title': '💰 മാർക്കറ്റ് വില',
+                'mandi.placeholder': 'ഫസൽ പേര്',
+                'mandi.button': 'വില അന്വേഷിക്കുക',
+                'schemes.title': '🏛️ സർക്കാർ പദ്ധതികൾ',
+                'response.title': '📝 ഉത്തരം',
+                'response.loading': '⏳ ഉത്തരം തയ്യാറാക്കുന്നു...',
+                'nav.voice': '🎤 ശബ്ദം',
+                'nav.photo': '📷 ഫോട്ടോ',
+                'nav.weather': '🌤️ കാലാവസ്ഥ',
+                'nav.mandi': '💰 വില',
+                'nav.schemes': '🏛️ പദ്ധതി',
+                'diagnosis': '🔍 രോഗനിർണ്ണയം:',
+                'solution': '💡 പരിഹാരം:',
+                'fertilizers': '🧪 ശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ:',
+                'weather.info': 'കാലാവസ്ഥ: 28°C, മഴ സാധ്യത 70%. കാർഷിക പ്രവർത്തനങ്ങൾക്ക് അനുകൂലം.',
+                'price.info': 'വില: ₹30/കിലോ (കൊച്ചി മണ്ടി). വിൽപ്പനയ്ക്ക് അനുകൂല സമയം.',
+                'general.advice': 'മണ്ണ് പരിശോധന നടത്തുക. pH 6.5-7.5 നിലനിർത്തുക. ജൈവ കമ്പോസ്റ്റ് ഉപയോഗിക്കുക.'
+            },
+            'en-IN': {
+                'app.name': 'KisanVaani',
+                'app.title': 'KisanVaani Farmer Assistant',
+                'greetings.welcome': 'Welcome, dear farmer!',
+                'greetings.kochi': 'Welcome, Kochi farmer!',
+                'greetings.wayanad': 'Wayanad farmer, welcome!',
+                'greetings.punjab': 'Punjab farmer brother, welcome!',
+                'tip.title': '💡 Today's Tip',
+                'tip.content': 'During monsoon, irrigate paddy every 5-7 days.',
+                'tip.coconut': 'Check coconut for bud rot during rainy season.',
+                'tip.soil': 'Maintain soil pH between 6.5-7.5.',
+                'tip.organic': 'Use organic fertilizers for better soil health.',
+                'voice.title': '🎤 Ask by Voice!',
+                'voice.description': 'Crop, weather, price, scheme - speak or type your query.',
+                'mic.checking': 'Checking microphone...',
+                'mic.ready': 'Microphone ready!',
+                'mic.listening': 'Listening... speak now!',
+                'mic.heard': 'Heard:',
+                'mic.denied': 'Microphone access denied. Please allow microphone access and try again.',
+                'mic.nospeech': 'No speech heard. Please try again.',
+                'mic.error': 'Speech error:',
+                'input.placeholder': 'Type here...',
+                'buttons.send': 'Send',
+                'photo.title': '📷 Upload Crop Photo',
+                'photo.description': 'Upload your crop photo to identify problems',
+                'photo.submit': 'Analyze Photo',
+                'photo.select': 'Please select a photo.',
+                'photo.analyzing': 'Analyzing photo...',
+                'photo.ready': 'Photo ready!',
+                'photo.complete': 'Analysis complete!',
+                'weather.title': '🌤️ Weather',
+                'weather.placeholder': 'Enter city name',
+                'weather.button': 'Get Weather',
+                'mandi.title': '💰 Market Price',
+                'mandi.placeholder': 'Crop name',
+                'mandi.button': 'Check Price',
+                'schemes.title': '🏛️ Government Schemes',
+                'response.title': '📝 Answer',
+                'response.loading': '⏳ Preparing answer...',
+                'nav.voice': '🎤 Voice',
+                'nav.photo': '📷 Photo',
+                'nav.weather': '🌤️ Weather',
+                'nav.mandi': '💰 Price',
+                'nav.schemes': '🏛️ Schemes',
+                'diagnosis': '🔍 Diagnosis:',
+                'solution': '💡 Solution:',
+                'fertilizers': '🧪 Recommended Fertilizers:',
+                'weather.info': 'Weather: 28°C, 70% chance of rain. Suitable for farming activities.',
+                'price.info': 'Price: ₹30/kg (Delhi Mandi). Good time for selling.',
+                'general.advice': 'Test your soil. Maintain pH 6.5-7.5. Use organic compost.'
+            }
+        };
+
+        // Enhanced agricultural data with multilingual support
         this.agriculturalData = {
-            cropProblems: {
-                'ഇലകൾ മഞ്ഞ': { 
-                    diagnosis: 'നൈട്രജൻ കുറവ്', 
-                    solution: 'യൂറിയ 25kg/ഏക്കർ തളിക്കുക. മഴയ്ക്ക് മുമ്പ് പ്രയോഗിക്കുക.',
-                    fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്']
-                },
-                'yellow leaves': { 
-                    diagnosis: 'Nitrogen deficiency', 
-                    solution: 'Apply Urea 25kg/acre before rain. Also use organic compost.',
-                    fertilizers: ['Urea', 'Ammonium Sulfate', 'Organic Compost']
-                },
-                'ഇലകൾ വാടി': {
-                    diagnosis: 'ജല കുറവ് അല്ലെങ്കിൽ വേരുചീയൽ',
-                    solution: 'ജലസേചനം പരിശോധിക്കുക. കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക.',
-                    fertilizers: ['കാർബെൻഡാസിം', 'NPK 19:19:19']
-                },
-                'brown spots': {
-                    diagnosis: 'Fungal infection',
-                    solution: 'Use Carbendazim spray. Improve air circulation.',
-                    fertilizers: ['Carbendazim', 'Copper Sulfate', 'Neem Oil']
+            'hi-IN': {
+                cropProblems: {
+                    'पत्ते पीले': { 
+                        diagnosis: 'नाइट्रोजन की कमी', 
+                        solution: 'यूरिया 25 किलो/एकड़ डालें। बारिश से पहले दें।',
+                        fertilizers: ['यूरिया', 'अमोनियम सल्फेट', 'जैविक खाद']
+                    },
+                    'yellow leaves': { 
+                        diagnosis: 'नाइट्रोजन की कमी', 
+                        solution: 'यूरिया 25 किलो/एकड़ डालें। जैविक खाद भी मिलाएं।',
+                        fertilizers: ['यूरिया', 'अमोनियम सल्फेट', 'जैविक कम्पोस्ट']
+                    },
+                    'पत्ते मुरझाए': {
+                        diagnosis: 'पानी की कमी या जड़ सड़न',
+                        solution: 'सिंचाई देखें। कार्बेंडाजिम छिड़काव करें।',
+                        fertilizers: ['कार्बेंडाजिम', 'NPK 19:19:19']
+                    },
+                    'brown spots': {
+                        diagnosis: 'फंगल संक्रमण',
+                        solution: 'कार्बेंडाजिम स्प्रे करें। हवा का संचार बढ़ाएं।',
+                        fertilizers: ['कार्बेंडाजिम', 'कॉपर सल्फेट', 'नीम तेल']
+                    }
+                }
+            },
+            'ml-IN': {
+                cropProblems: {
+                    'ഇലകൾ മഞ്ഞ': { 
+                        diagnosis: 'നൈട്രജൻ കുറവ്', 
+                        solution: 'യൂറിയ 25kg/ഏക്കർ തളിക്കുക. മഴയ്ക്ക് മുമ്പ് നൽകുക.',
+                        fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്', 'ജൈവ കമ്പോസ്റ്റ്']
+                    },
+                    'yellow leaves': { 
+                        diagnosis: 'നൈട്രജൻ കുറവ്', 
+                        solution: 'യൂറിയ 25kg/ഏക്കർ പ്രയോഗിക്കുക. ജൈവ കമ്പോസ്റ്റ് ചേർക്കുക.',
+                        fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്', 'ജൈവ കമ്പോസ്റ്റ്']
+                    },
+                    'ഇലകൾ വാടി': {
+                        diagnosis: 'ജല കുറവ് അല്ലെങ്കിൽ വേരുചീയൽ',
+                        solution: 'ജലസേചനം പരിശോധിക്കുക. കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക.',
+                        fertilizers: ['കാർബെൻഡാസിം', 'NPK 19:19:19']
+                    },
+                    'brown spots': {
+                        diagnosis: 'ഫംഗൽ അണുബാധ',
+                        solution: 'കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക. വായു സഞ്ചാരം മെച്ചപ്പെടുത്തുക.',
+                        fertilizers: ['കാർബെൻഡാസിം', 'കോപ്പർ സൾഫേറ്റ്', 'വേപ്പെണ്ണ']
+                    }
+                }
+            },
+            'en-IN': {
+                cropProblems: {
+                    'yellow leaves': { 
+                        diagnosis: 'Nitrogen deficiency', 
+                        solution: 'Apply Urea 25kg/acre before rain. Use organic compost too.',
+                        fertilizers: ['Urea', 'Ammonium Sulfate', 'Organic Compost']
+                    },
+                    'wilted leaves': {
+                        diagnosis: 'Water stress or root rot',
+                        solution: 'Check irrigation. Apply Carbendazim spray.',
+                        fertilizers: ['Carbendazim', 'NPK 19:19:19']
+                    },
+                    'brown spots': {
+                        diagnosis: 'Fungal infection',
+                        solution: 'Use Carbendazim spray. Improve air circulation.',
+                        fertilizers: ['Carbendazim', 'Copper Sulfate', 'Neem Oil']
+                    }
                 }
             }
         };
 
-        this.schemes = [
-            { name: "PM-KISAN", desc: "₹6000/വർഷം", link: "https://pmkisan.gov.in/" },
-            { name: "Kudumbashree", desc: "കർഷക വായ്പകൾ", link: "https://www.kudumbashree.org/" },
-            { name: "ATMA", desc: "കാർഷിക വിപുലീകരണം", link: "#" }
-        ];
+        this.schemes = {
+            'hi-IN': [
+                { name: "PM-KISAN", desc: "₹6000/साल", link: "https://pmkisan.gov.in/" },
+                { name: "Pradhan Mantri Fasal Bima Yojana", desc: "फसल बीमा योजना", link: "#" },
+                { name: "Kisan Credit Card", desc: "किसान क्रेडिट कार्ड", link: "#" }
+            ],
+            'ml-IN': [
+                { name: "PM-KISAN", desc: "₹6000/വർഷം", link: "https://pmkisan.gov.in/" },
+                { name: "Kudumbashree", desc: "കർഷക വായ്പകൾ", link: "https://www.kudumbashree.org/" },
+                { name: "ATMA", desc: "കാർഷിക വിപുലീകരണം", link: "#" }
+            ],
+            'en-IN': [
+                { name: "PM-KISAN", desc: "₹6000/year direct benefit", link: "https://pmkisan.gov.in/" },
+                { name: "Crop Insurance Scheme", desc: "Pradhan Mantri Fasal Bima Yojana", link: "#" },
+                { name: "Kisan Credit Card", desc: "Agricultural credit facility", link: "#" }
+            ]
+        };
 
         this.initApp();
     }
@@ -47,42 +261,61 @@ class KisanVaaniApp {
             document.getElementById('appContent').style.display = 'block';
         }, 3000);
 
-        // Set random greeting
-        const greetings = ['നമസ്കാരം കർഷക സുഹൃത്തേ!', 'ഹലോ കൊച്ചി കർഷകേ!', 'വയനാട് കർഷകാ, സ്വാഗതം!'];
-        document.getElementById('greeting').textContent = greetings[Math.floor(Math.random() * greetings.length)];
-
-        // Set random daily tip
-        const tips = [
-            'മഴക്കാലത്ത് നാളികേരം ബഡ് റോട്ട് പരിശോധിക്കുക.',
-            'നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.',
-            'മണ്ണിന്റെ pH 6.5-7.5 വരെ നിലനിർത്തുക.',
-            'Use organic fertilizers for better soil health.'
-        ];
-        document.getElementById('dailyTip').textContent = tips[Math.floor(Math.random() * tips.length)];
-
+        this.updateLanguage();
         this.checkSystemRequirements();
         this.setupEventListeners();
         this.populateSchemes();
     }
 
+    updateLanguage() {
+        // Update all text elements with data-i18n attributes
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            const translation = this.translations[this.currentLang][key];
+            if (translation) {
+                element.textContent = translation;
+            }
+        });
+
+        // Update placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const key = element.getAttribute('data-i18n-placeholder');
+            const translation = this.translations[this.currentLang][key];
+            if (translation) {
+                element.placeholder = translation;
+            }
+        });
+
+        // Set random greeting
+        const greetingKeys = ['greetings.welcome', 'greetings.kochi', 'greetings.wayanad', 'greetings.punjab'];
+        const randomKey = greetingKeys[Math.floor(Math.random() * greetingKeys.length)];
+        document.getElementById('greeting').textContent = this.translations[this.currentLang][randomKey];
+
+        // Set random daily tip
+        const tipKeys = ['tip.content', 'tip.coconut', 'tip.soil', 'tip.organic'];
+        const randomTipKey = tipKeys[Math.floor(Math.random() * tipKeys.length)];
+        document.getElementById('dailyTip').textContent = this.translations[this.currentLang][randomTipKey];
+
+        // Update document language
+        document.documentElement.lang = this.currentLang.split('-')[0];
+    }
+
     checkSystemRequirements() {
-        // Check if speech recognition is supported
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const micBtn = document.getElementById('micBtn');
         const status = document.getElementById('status');
 
         if (SpeechRecognition) {
             micBtn.disabled = false;
-            status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+            status.textContent = this.translations[this.currentLang]['mic.ready'];
             status.style.color = 'green';
         } else {
-            status.textContent = 'ശബ്ദ പിന്തുണ ലഭ്യമല്ല.';
+            status.textContent = 'Speech recognition not supported';
             status.style.color = 'red';
         }
 
-        // Check HTTPS
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-            status.textContent = 'HTTPS ആവശ്യമാണ് മൈക്രോഫോൺ പ്രവർത്തനത്തിന്.';
+            status.textContent = 'HTTPS required for microphone access';
             status.style.color = 'orange';
         }
     }
@@ -97,6 +330,14 @@ class KisanVaaniApp {
         const photoInput = document.getElementById('photoInput');
         const photoSubmitBtn = document.getElementById('photoSubmitBtn');
 
+        // Language selection with dynamic update
+        langSelect.addEventListener('change', (e) => {
+            this.currentLang = e.target.value;
+            this.updateLanguage();
+            this.checkSystemRequirements();
+            this.populateSchemes();
+        });
+
         // Voice input
         micBtn.addEventListener('click', () => this.startVoiceInput());
 
@@ -106,13 +347,8 @@ class KisanVaaniApp {
             if (e.key === 'Enter') this.processTextInput();
         });
 
-        // Language selection
-        langSelect.addEventListener('change', (e) => {
-            this.currentLang = e.target.value;
-        });
-
         // Weather and Mandi
-        weatherBtn.addEventListener('click', () => this.fetchWeather(document.getElementById('cityInput').value || 'Kochi'));
+        weatherBtn.addEventListener('click', () => this.fetchWeather(document.getElementById('cityInput').value || 'Delhi'));
         mandiBtn.addEventListener('click', () => this.fetchMandiPrices(document.getElementById('mandiSearch').value || 'Tomato'));
 
         // Photo upload functionality
@@ -150,7 +386,7 @@ class KisanVaaniApp {
         const status = document.getElementById('status');
 
         if (!SpeechRecognition) {
-            this.showError('ശബ്ദ പിന്തുണ ഈ ബ്രൗസറിൽ ലഭ്യമല്ല.');
+            this.showError('Speech recognition not supported in this browser.');
             return;
         }
 
@@ -169,31 +405,31 @@ class KisanVaaniApp {
                 this.isListening = true;
                 micBtn.classList.add('listening');
                 micBtn.textContent = '🛑';
-                status.textContent = 'കേൾക്കുന്നു... സംസാരിക്കുക!';
+                status.textContent = this.translations[this.currentLang]['mic.listening'];
                 status.style.color = 'blue';
             };
 
             this.recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 document.getElementById('textInput').value = transcript;
-                status.textContent = `കേട്ടു: "${transcript}"`;
+                status.textContent = `${this.translations[this.currentLang]['mic.heard']} "${transcript}"`;
                 this.processQuery(transcript);
                 this.stopListening();
             };
 
             this.recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                let errorMessage = 'ശബ്ദ പിശക്: ';
+                let errorMessage = this.translations[this.currentLang]['mic.error'] + ' ';
 
                 switch(event.error) {
                     case 'not-allowed':
-                        errorMessage += 'മൈക്രോഫോൺ അനുമതി നിഷേധിച്ചു. അനുമതി നൽകി വീണ്ടും ശ്രമിക്കുക.';
+                        errorMessage = this.translations[this.currentLang]['mic.denied'];
                         break;
                     case 'no-speech':
-                        errorMessage += 'ശബ്ദം കേട്ടില്ല. വീണ്ടും ശ്രമിക്കുക.';
+                        errorMessage = this.translations[this.currentLang]['mic.nospeech'];
                         break;
                     case 'network':
-                        errorMessage += 'നെറ്റ്‌വർക്ക് പിശക്.';
+                        errorMessage += 'Network error';
                         break;
                     default:
                         errorMessage += event.error;
@@ -211,7 +447,7 @@ class KisanVaaniApp {
 
         } catch (error) {
             console.error('Error starting speech recognition:', error);
-            this.showError('മൈക്രോഫോൺ ആരംഭിക്കാൻ കഴിയുന്നില്ല.');
+            this.showError('Cannot start microphone.');
         }
     }
 
@@ -226,7 +462,7 @@ class KisanVaaniApp {
         this.isListening = false;
         micBtn.classList.remove('listening');
         micBtn.textContent = '🎤';
-        status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+        status.textContent = this.translations[this.currentLang]['mic.ready'];
         status.style.color = 'green';
     }
 
@@ -247,9 +483,9 @@ class KisanVaaniApp {
         // Show loading
         this.showLoading();
 
-        if (lowerQuery.includes('കാലാവസ്ഥ') || lowerQuery.includes('weather')) {
-            response = await this.fetchWeather('Kochi');
-        } else if (lowerQuery.includes('വില') || lowerQuery.includes('price') || lowerQuery.includes('മാർക്കറ്റ്')) {
+        if (lowerQuery.includes('मौसम') || lowerQuery.includes('കാലാവസ്ഥ') || lowerQuery.includes('weather')) {
+            response = await this.fetchWeather('Delhi');
+        } else if (lowerQuery.includes('दाम') || lowerQuery.includes('वाल') || lowerQuery.includes('വില') || lowerQuery.includes('price') || lowerQuery.includes('मार्केट')) {
             response = await this.fetchMandiPrices('Tomato');
         } else {
             response = this.getAIResponse(lowerQuery);
@@ -263,12 +499,12 @@ class KisanVaaniApp {
         const preview = document.getElementById('photoPreview');
         const reader = new FileReader();
 
-        reader.onload = function(e) {
+        reader.onload = (e) => {
             preview.innerHTML = `<img src="${e.target.result}" alt="Crop preview" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
         };
 
         reader.readAsDataURL(file);
-        document.getElementById('photoStatus').textContent = 'ഫോട്ടോ തയ്യാറായി!';
+        document.getElementById('photoStatus').textContent = this.translations[this.currentLang]['photo.ready'];
     }
 
     async analyzePhoto() {
@@ -276,111 +512,70 @@ class KisanVaaniApp {
         const photoStatus = document.getElementById('photoStatus');
 
         if (!photoInput.files[0]) {
-            photoStatus.textContent = 'ദയവായി ഒരു ഫോട്ടോ തിരഞ്ഞെടുക്കുക.';
+            photoStatus.textContent = this.translations[this.currentLang]['photo.select'];
             photoStatus.style.color = 'red';
             return;
         }
 
-        photoStatus.textContent = 'ഫോട്ടോ വിശകലനം ചെയ്യുന്നു...';
+        photoStatus.textContent = this.translations[this.currentLang]['photo.analyzing'];
         photoStatus.style.color = 'blue';
 
-        // Simulate AI analysis (replace with actual AI service)
+        // Simulate AI analysis
         setTimeout(() => {
-            // Random diagnosis for demo
-            const problems = [
-                {
-                    diagnosis: 'ഇലകളിൽ മഞ്ഞനിറം കണ്ടെത്തി - നൈട്രജൻ കുറവ്',
-                    solution: 'യൂറിയ 25kg/ഏക്കർ എന്ന തോതിൽ പ്രയോഗിക്കുക. മഴയ്ക്ക് മുമ്പ് നൽകുക.',
-                    fertilizers: ['യൂറിയ', 'അമോണിയം സൾഫേറ്റ്', 'ജൈവ കമ്പോസ്റ്റ്']
-                },
-                {
-                    diagnosis: 'ഇലകളിൽ തവിട്ടുനിറ പാടുകൾ - ഫംഗൽ അണുബാധ',
-                    solution: 'കാർബെൻഡാസിം സ്പ്രേ ചെയ്യുക. വായു സഞ്ചാരം മെച്ചപ്പെടുത്തുക.',
-                    fertilizers: ['കാർബെൻഡാസിം', 'കോപ്പർ സൾഫേറ്റ്', 'വേപ്പെണ്ണ']
-                },
-                {
-                    diagnosis: 'ആരോഗ്യകരമായ സസ്യം - പ്രതിരോധ പരിചരണം ആവശ്യം',
-                    solution: 'NPK 19:19:19 പ്രയോഗിക്കുക. ജൈവ കമ്പോസ്റ്റ് ചേർക്കുക.',
-                    fertilizers: ['NPK 19:19:19', 'ജൈവ കമ്പോസ്റ്റ്', 'വേപ്പ് കേക്ക്']
-                }
-            ];
-
+            const currentLangData = this.agriculturalData[this.currentLang];
+            const problems = Object.values(currentLangData.cropProblems);
             const randomProblem = problems[Math.floor(Math.random() * problems.length)];
 
             const response = {
                 diagnosis: randomProblem.diagnosis,
-                solution: `${randomProblem.solution}\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: ${randomProblem.fertilizers.join(', ')}`,
+                solution: `${randomProblem.solution}\n\n${this.translations[this.currentLang]['fertilizers']} ${randomProblem.fertilizers.join(', ')}`,
                 fertilizers: randomProblem.fertilizers
             };
 
             this.showResponse(response);
             this.speakResponse(response);
 
-            photoStatus.textContent = 'വിശകലനം പൂർത്തീകരിച്ചു!';
+            photoStatus.textContent = this.translations[this.currentLang]['photo.complete'];
             photoStatus.style.color = 'green';
         }, 2000);
     }
 
     async fetchWeather(city) {
-        try {
-            // Mock weather data for demo
-            const weatherData = {
-                solution: `${city} കാലാവസ്ഥ: 28°C, മഴ സാധ്യത 70%. കാർഷിക പ്രവർത്തനങ്ങൾക്ക് അനുകൂലം.`
-            };
-            return weatherData;
-        } catch (err) {
-            return { 
-                solution: 'കാലാവസ്ഥ വിവരങ്ങൾ ലഭ്യമല്ല. പൊതുവേ 25-30°C, മഴ സാധ്യത.'
-            };
-        }
+        return {
+            solution: `${city} ${this.translations[this.currentLang]['weather.info']}`
+        };
     }
 
     async fetchMandiPrices(commodity) {
-        try {
-            // Mock mandi prices for demo
-            const prices = {
-                'Tomato': '₹30/kg',
-                'Onion': '₹25/kg', 
-                'Rice': '₹45/kg',
-                'Coconut': '₹35/piece'
-            };
-
-            return {
-                solution: `${commodity} വില: ${prices[commodity] || '₹25/kg'} (പാലക്കാട് മണ്ടി). വിൽപ്പനയ്ക്ക് അനുകൂല സമയം.`
-            };
-        } catch (err) {
-            return { 
-                solution: 'മാർക്കറ്റ് വിലകൾ ലഭ്യമല്ല. ശരാശരി വില: ₹25-30/kg.'
-            };
-        }
+        return {
+            solution: `${commodity} ${this.translations[this.currentLang]['price.info']}`
+        };
     }
 
     getAIResponse(query) {
-        // Enhanced AI response with fertilizer recommendations
         const lowerQuery = query.toLowerCase();
+        const currentLangData = this.agriculturalData[this.currentLang];
 
-        for (const [key, data] of Object.entries(this.agriculturalData.cropProblems)) {
+        for (const [key, data] of Object.entries(currentLangData.cropProblems)) {
             if (lowerQuery.includes(key.toLowerCase()) || 
                 lowerQuery.includes(data.diagnosis.toLowerCase())) {
                 return {
                     diagnosis: data.diagnosis,
-                    solution: `${data.solution}\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: ${data.fertilizers.join(', ')}`,
+                    solution: `${data.solution}\n\n${this.translations[this.currentLang]['fertilizers']} ${data.fertilizers.join(', ')}`,
                     fertilizers: data.fertilizers
                 };
             }
         }
 
-        // Default response with general advice
         return { 
-            diagnosis: 'പൊതു ഉപദേശം', 
-            solution: 'മണ്ണ് പരിശോധന നടത്തുക. pH 6.5-7.5 നിലനിർത്തുക. ജൈവ കമ്പോസ്റ്റ് ഉപയോഗിക്കുക.\n\nശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ: NPK 19:19:19, ജൈവ കമ്പോസ്റ്റ്',
-            fertilizers: ['NPK 19:19:19', 'ജൈവ കമ്പോസ്റ്റ്', 'വേപ്പ് കേക്ക്']
+            diagnosis: this.translations[this.currentLang]['general.advice'].split('.')[0],
+            solution: this.translations[this.currentLang]['general.advice'],
+            fertilizers: ['NPK 19:19:19', 'जैविक कम्पोस्ट']
         };
     }
 
     speakResponse(response) {
         if (this.synthesis && response.solution) {
-            // Stop any ongoing speech
             this.synthesis.cancel();
 
             const text = response.solution.replace(/\n/g, ' ');
@@ -400,15 +595,15 @@ class KisanVaaniApp {
         let html = '';
 
         if (response.diagnosis) {
-            html += `<div class="diagnosis"><strong>🔍 രോഗനിർണ്ണയം:</strong> ${response.diagnosis}</div>`;
+            html += `<div class="diagnosis"><strong>${this.translations[this.currentLang]['diagnosis']}</strong> ${response.diagnosis}</div>`;
         }
 
         if (response.solution) {
-            html += `<div class="solution"><strong>💡 പരിഹാരം:</strong> ${response.solution.replace(/\n/g, '<br>')}</div>`;
+            html += `<div class="solution"><strong>${this.translations[this.currentLang]['solution']}</strong> ${response.solution.replace(/\n/g, '<br>')}</div>`;
         }
 
         if (response.fertilizers) {
-            html += `<div class="fertilizers"><strong>🧪 ശുപാർശ ചെയ്യുന്ന രാസവളങ്ങൾ:</strong><ul>`;
+            html += `<div class="fertilizers"><strong>${this.translations[this.currentLang]['fertilizers']}</strong><ul>`;
             response.fertilizers.forEach(fertilizer => {
                 html += `<li>${fertilizer}</li>`;
             });
@@ -418,7 +613,6 @@ class KisanVaaniApp {
         responseContent.innerHTML = html;
         responseSection.classList.remove('hidden');
 
-        // Scroll to response
         responseSection.scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -426,7 +620,7 @@ class KisanVaaniApp {
         const responseSection = document.getElementById('responseSection');
         const responseContent = document.getElementById('responseContent');
 
-        responseContent.innerHTML = '<div class="loading">⏳ ഉത്തരം തയ്യാറാക്കുന്നു...</div>';
+        responseContent.innerHTML = `<div class="loading">${this.translations[this.currentLang]['response.loading']}</div>`;
         responseSection.classList.remove('hidden');
     }
 
@@ -435,23 +629,24 @@ class KisanVaaniApp {
         status.textContent = message;
         status.style.color = 'red';
 
-        // Clear error after 5 seconds
         setTimeout(() => {
-            status.textContent = 'മൈക്രോഫോൺ തയ്യാർ!';
+            status.textContent = this.translations[this.currentLang]['mic.ready'];
             status.style.color = 'green';
         }, 5000);
     }
 
     populateSchemes() {
         const schemesList = document.getElementById('schemesList');
+        schemesList.innerHTML = '';
 
-        this.schemes.forEach(scheme => {
+        const currentSchemes = this.schemes[this.currentLang];
+        currentSchemes.forEach(scheme => {
             const div = document.createElement('div');
             div.className = 'scheme-item';
             div.innerHTML = `
                 <h4>${scheme.name}</h4>
                 <p>${scheme.desc}</p>
-                <a href="${scheme.link}" target="_blank">കൂടുതൽ അറിയുക</a>
+                <a href="${scheme.link}" target="_blank">Know More</a>
             `;
             schemesList.appendChild(div);
         });
