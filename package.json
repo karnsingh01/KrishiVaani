@@ -1,7 +1,13 @@
 {
-  "name": "kisanvaani-backend",
-  "version": "1.0.0",
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  }
+  "name": "kisanvaani-app",
+  "version": "2.0.0",
+  "description": "AI-powered Kerala farming assistant with voice and photo analysis",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": ["agriculture", "farming", "kerala", "ai", "voice", "photo-analysis"],
+  "author": "KarnSingh",
+  "license": "MIT"
 }
