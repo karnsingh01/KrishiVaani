@@ -1,44 +1,25 @@
-const fetch = require('node-fetch');
-
 exports.handler = async (event, context) => {
   try {
-    const { query, lang = 'hi-IN' } = event.queryStringParameters || {};
-    const apiKey = process.env.GOOGLE_API_KEY; // Set in Netlify
-    if (!apiKey) throw new Error('Google API key missing.');
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${query} (Respond in ${lang === 'hi-IN' ? 'Hindi' : lang === 'ml-IN' ? 'Malayalam' : 'English'} for Kerala farmers: weather, prices, crop advice).`
-          }]
-        }]
-      })
-    });
-
-    if (!response.ok) throw new Error(`Google API error: ${response.status}`);
-    const data = await response.json();
-    const solution = data.candidates[0]?.content?.parts[0]?.text || 'No response from AI.';
-
+    const { query = '', lang = 'ml' } = event.queryStringParameters || {};
+    const problems = {
+      'ഇലകൾ മഞ്ഞ': { diagnosis: 'നൈട്രജൻ കുറവ്', solution: 'യൂറിയ 25kg/ഏക്കർ തളിക്കുക.' },
+      'yellow leaves': { diagnosis: 'Nitrogen deficiency', solution: 'Urea 25kg/acre.' },
+      'ബഡ് റോട്ട്': { diagnosis: 'നാളികേരത്തിൽ ബഡ് റോട്ട്', solution: 'ബോർഡോ മിശ്രിതം 1% സ്പ്രേ.' }
+    };
+    const key = Object.keys(problems).find(k => query.includes(k)) || 'general';
+    const data = problems[key] || { diagnosis: 'പൊതു ഉപദേശം', solution: 'മണ്ണ് പരിശോധിക്കുക (Test soil).' };
+    
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ solution, lang })
+      body: JSON.stringify(data)
     };
   } catch (error) {
-    console.error('AI Query error:', error.message);
-    return {
-      statusCode: 500,
+    console.error('Advice error:', error);
+    return { 
+      statusCode: 500, 
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({
-        solution: lang === 'hi-IN'
-          ? 'AI उत्तर उपलब्ध नहीं। फॉलबैक: मिट्टी की जांच करें।'
-          : lang === 'ml-IN'
-          ? 'AI ഉത്തരം ലഭ്യമല്ല. ഫോൾബാക്ക്: മണ്ണ് പരിശോധിക്കുക.'
-          : 'AI response unavailable. Fallback: Test soil.'
-      })
+      body: JSON.stringify({ solution: 'ഉപദേശം ലഭ്യമല്ല. പിന്നീട് ശ്രമിക്കൂ.' }) 
     };
   }
 };
