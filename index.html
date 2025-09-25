@@ -1,35 +1,91 @@
-<!-- Existing splash/header... -->
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KisanVaani – Kerala Farmer App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+</head>
+<body>
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="splash-icon">🌾</div>
+            <h2>KisanVaani ലോഡ് ചെയ്യുന്നു...</h2>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
 
-<!-- Voice Card (add data-i18n to buttons/titles) -->
-<div class="voice-card" id="voice-card">
-  <h2 data-i18n="voicePrompt" class="voice-prompt">सब कुछ पूछें – आवाज में!</h2>
-  <!-- Existing mic/input... -->
-  <button id="sendBtn" data-i18n="sendBtn" class="send-btn">भेजें</button>
-</div>
+    <div class="container" id="appContent" style="display:none;">
+        <header class="header">
+            <h1 class="title">🌿 KisanVaani</h1>
+            <p class="subtitle" id="greeting">നമസ്കാരം! ഇന്നത്തെ ടിപ്പ്: നാളികേരത്തിൽ ബഡ് റോട്ട് പരിശോധിക്കുക.</p>
+        </header>
 
-<!-- New: Crop Photo Section -->
-<div class="section-card hidden" id="cropSection">
-  <h2 data-i18n="cropNav">📸 फसल फोटो लें</h2>
-  <p>अपनी फसल की फोटो खींचें और बीमारी का पता लगाएं।</p>
-  <video id="cropVideo" autoplay style="width:100%; border-radius:1rem;"></video>
-  <button id="captureBtn" class="send-btn">फोटो लें</button>
-  <canvas id="cropCanvas" style="display:none;"></canvas>
-  <img id="cropPhoto" style="max-width:100%; border-radius:1rem; display:none;" />
-  <div id="cropResponse" class="response-section"></div>
-</div>
+        <div class="language-selector">
+            <select id="langSelect">
+                <option value="ml-IN">മലയാളം</option>
+                <option value="hi-IN">हिंदी</option>
+                <option value="en-IN">English</option>
+            </select>
+        </div>
 
-<!-- Bottom Nav: Add Crop Button -->
-<div class="bottom-nav">
-  <button class="nav-btn active" data-section="home" data-i18n="homeNav">🏠</button>
-  <button class="nav-btn" data-section="weather" data-i18n="weatherNav">☀️</button>
-  <button class="nav-btn" data-section="market" data-i18n="marketNav">🛒</button>
-  <button class="nav-btn" data-section="schemes" data-i18n="schemesNav">🏛️</button>
-  <button class="nav-btn" data-section="crop" data-i18n="cropNav">📸</button> <!-- New -->
-</div>
+        <section class="tip-card">
+            <h3>🌟 ഇന്നത്തെ ഉപദേശം</h3>
+            <p id="dailyTip">മഴക്കാലത്ത് നെല്ല് ജലസേചനം 5-7 ദിവസത്തിലൊരിക്കൽ.</p>
+        </section>
 
-<!-- Language Selector: Ensure options have values like value="hi-IN" -->
-<select id="langSelect">
-  <option value="hi-IN" selected>हिंदी</option>
-  <option value="ml-IN">മലയാളം</option>
-  <option value="en-US">English</option>
-</select>
+        <section class="voice-card">
+            <h2>🎤 എല്ലാം ചോദിക്കൂ – ശബ്ദത്തിൽ!</h2>
+            <p>ഫലം, കാലാവസ്ഥ, വില, പദ്ധതി – പറയൂ അല്ലെങ്കിൽ ടൈപ്പ് ചെയ്യൂ.</p>
+            <div class="mic-container">
+                <button id="micBtn" class="mic-btn" disabled>🎤</button>
+                <div class="status" id="status">പറയൂ...</div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="textInput" class="text-input" placeholder="ഉദാ: Kochi weather അല്ലെങ്കിൽ ടൊമാറ്റോ വില">
+                <button id="sendBtn" class="send-btn">അയയ്ക്കൂ</button>
+            </div>
+        </section>
+
+        <section id="responseSection" class="response-section hidden">
+            <h3>🤖 ഉത്തരം:</h3>
+            <div id="responseContent"></div>
+        </section>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-section="home">🏠 ഹോം</button>
+            <button class="nav-btn" data-section="weather">☀️ കാലാവസ്ഥ</button>
+            <button class="nav-btn" data-section="mandi">🛒 മാർക്കറ്റ്</button>
+            <button class="nav-btn" data-section="schemes">🏛️ പദ്ധതികൾ</button>
+        </nav>
+
+        <section id="weatherSection" class="section-card hidden">
+            <h2>☀️ IMD കാലാവസ്ഥ (കൊച്ചി)</h2>
+            <input type="text" id="cityInput" placeholder="നഗരം (Kochi)">
+            <button id="weatherBtn">കാണൂ</button>
+            <div id="weatherOutput"></div>
+        </section>
+
+        <section id="mandiSection" class="section-card hidden">
+            <h2>🛒 മാർക്കറ്റ് വിലകൾ (കേരളം)</h2>
+            <input type="text" id="mandiSearch" placeholder="തിരയൂ: ടൊമാറ്റോ പാലക്കാട്">
+            <select id="commoditySelect">
+                <option value="Tomato">ടൊമാറ്റോ</option>
+                <option value="Onion">ഉള്ളി</option>
+                <option value="Pineapple">പൈനാപ്പിൾ</option>
+            </select>
+            <button id="mandiBtn">തിരയൂ</button>
+            <div id="mandiOutput"></div>
+        </section>
+
+        <section id="schemesSection" class="section-card hidden">
+            <ul id="schemesList"></ul>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
